@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔐 사림의 비밀 문서함을 열어라!</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700&family=Noto+Sans+KR:wght@400;500;700&display=swap');
+
+  :root {
+    --ink: #2C1A0E;
+    --paper: #F5EDD6;
+    --paper-dark: #E8D9B0;
+    --paper-shadow: #C8B48A;
+    --red-seal: #9B2335;
+    --red-light: #F5C0C0;
+    --gold: #8B6914;
+    --gold-light: #F0D98A;
+    --brush: #4A3520;
+    --success: #1D6A3A;
+    --success-light: #C8E8D0;
+    --stage-locked: #B0A090;
+    --border: 2px solid var(--paper-shadow);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: #2C1A0E;
+    min-height: 100vh;
+    padding: 12px;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(200,180,140,0.08) 40px),
+      repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(200,180,140,0.08) 40px);
+  }
+
+  .game-container {
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  /* ─── HEADER ─── */
+  .header {
+    background: var(--paper);
+    border: 3px double var(--paper-shadow);
+    border-radius: 4px;
+    padding: 16px 20px 12px;
+    text-align: center;
+    margin-bottom: 10px;
+    position: relative;
+  }
+  .header::before, .header::after {
+    content: '◈';
+    position: absolute;
+    top: 8px;
+    color: var(--gold);
+    font-size: 18px;
+  }
+  .header::before { left: 12px; }
+  .header::after { right: 12px; }
+
+  .header h1 {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 20px;
+    color: var(--ink);
+    letter-spacing: 2px;
+    margin-bottom: 4px;
+  }
+  .header h1 span { color: var(--red-seal); }
+  .header .subtitle {
+    font-size: 12px;
+    color: var(--brush);
+    letter-spacing: 1px;
+  }
+
+  /* ─── TEAM SETUP ─── */
+  .setup-panel {
+    background: var(--paper);
+    border: var(--border);
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 10px;
+  }
+  .setup-panel h2 {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 15px;
+    color: var(--ink);
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--paper-shadow);
+    letter-spacing: 1px;
+  }
+  .setup-panel h2 span { color: var(--red-seal); font-size: 18px; }
+
+  .team-input-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .team-input-row input {
+    flex: 1;
+    padding: 9px 12px;
+    font-size: 14px;
+    font-family: 'Noto Sans KR', sans-serif;
+    background: #FBF5E4;
+    border: 1.5px solid var(--paper-shadow);
+    border-radius: 4px;
+    color: var(--ink);
+    outline: none;
+  }
+  .team-input-row input:focus { border-color: var(--gold); background: #FFF9EE; }
+  .team-input-row input::placeholder { color: var(--stage-locked); }
+
+  .btn-primary {
+    padding: 9px 18px;
+    font-size: 14px;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-weight: 700;
+    background: var(--red-seal);
+    color: #FFF;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: opacity 0.15s;
+  }
+  .btn-primary:hover { opacity: 0.85; }
+  .btn-primary:disabled { background: var(--stage-locked); cursor: not-allowed; }
+
+  .btn-secondary {
+    padding: 7px 14px;
+    font-size: 13px;
+    font-family: 'Noto Sans KR', sans-serif;
+    background: transparent;
+    color: var(--brush);
+    border: 1.5px solid var(--paper-shadow);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-secondary:hover { background: var(--paper-dark); }
+
+  .teams-list {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .team-badge {
+    background: var(--gold-light);
+    border: 1px solid var(--gold);
+    border-radius: 3px;
+    padding: 4px 10px;
+    font-size: 13px;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .team-badge .remove {
+    cursor: pointer;
+    color: var(--red-seal);
+    font-weight: 700;
+    font-size: 15px;
+    line-height: 1;
+  }
+
+  /* ─── GAME SCREEN ─── */
+  .game-screen { display: none; }
+  .game-screen.active { display: block; }
+
+  .team-bar {
+    background: var(--paper);
+    border: var(--border);
+    border-radius: 4px;
+    padding: 10px 16px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .team-name-display {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 15px;
+    color: var(--ink);
+  }
+  .team-name-display span { color: var(--red-seal); font-weight: 700; }
+  .timer-box {
+    font-size: 22px;
+    font-weight: 700;
+    font-family: 'Noto Serif KR', serif;
+    color: var(--ink);
+    min-width: 70px;
+    text-align: right;
+  }
+  .timer-box.warning { color: var(--red-seal); }
+
+  /* Progress bar */
+  .progress-row {
+    background: var(--paper);
+    border: var(--border);
+    border-radius: 4px;
+    padding: 10px 16px;
+    margin-bottom: 10px;
+  }
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--brush);
+    margin-bottom: 6px;
+  }
+  .progress-track {
+    height: 8px;
+    background: var(--paper-dark);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--gold);
+    border-radius: 4px;
+    transition: width 0.4s;
+  }
+  .stage-dots {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 6px;
+  }
+  .stage-dot {
+    font-size: 11px;
+    color: var(--stage-locked);
+    text-align: center;
+    flex: 1;
+  }
+  .stage-dot.done { color: var(--success); font-weight: 700; }
+  .stage-dot.current { color: var(--red-seal); font-weight: 700; }
+
+  /* ─── QUESTION CARD ─── */
+  .question-card {
+    background: var(--paper);
+    border: var(--border);
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 10px;
+    position: relative;
+  }
+  .question-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: var(--red-seal);
+    border-radius: 4px 4px 0 0;
+  }
+
+  .stage-label {
+    display: inline-block;
+    background: var(--red-seal);
+    color: #FFF;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 3px;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+  }
+  .q-context {
+    font-size: 12px;
+    color: var(--brush);
+    background: var(--paper-dark);
+    border-left: 3px solid var(--gold);
+    padding: 6px 10px;
+    border-radius: 0 4px 4px 0;
+    margin-bottom: 12px;
+    line-height: 1.6;
+  }
+  .q-text {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 15px;
+    color: var(--ink);
+    line-height: 1.8;
+    margin-bottom: 14px;
+    font-weight: 700;
+  }
+
+  /* Choice buttons */
+  .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .choices.single-col { grid-template-columns: 1fr; }
+  .choice-btn {
+    padding: 10px 14px;
+    font-size: 13px;
+    font-family: 'Noto Sans KR', sans-serif;
+    background: #FBF5E4;
+    border: 1.5px solid var(--paper-shadow);
+    border-radius: 4px;
+    cursor: pointer;
+    text-align: left;
+    color: var(--ink);
+    transition: border-color 0.15s, background 0.15s;
+    line-height: 1.5;
+  }
+  .choice-btn:hover:not(:disabled) { border-color: var(--gold); background: var(--gold-light); }
+  .choice-btn.correct { border-color: var(--success); background: var(--success-light); color: var(--success); font-weight: 700; }
+  .choice-btn.wrong { border-color: var(--red-seal); background: var(--red-light); color: var(--red-seal); }
+  .choice-btn:disabled { cursor: default; }
+
+  /* Ordering task */
+  .order-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+  .order-item {
+    padding: 10px 14px;
+    background: #FBF5E4;
+    border: 1.5px solid var(--paper-shadow);
+    border-radius: 4px;
+    font-size: 13px;
+    color: var(--ink);
+    cursor: grab;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .order-item.dragging { opacity: 0.4; }
+  .order-item.over { border-color: var(--gold); background: var(--gold-light); }
+  .order-num {
+    width: 22px; height: 22px;
+    background: var(--paper-shadow);
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    color: var(--ink);
+  }
+  .order-check-btn {
+    margin-top: 10px;
+    padding: 9px 20px;
+    font-size: 14px;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-weight: 700;
+    background: var(--brush);
+    color: #FFF;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .order-check-btn:hover { opacity: 0.85; }
+
+  /* Text input */
+  .text-input-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .text-input-row input {
+    flex: 1;
+    padding: 9px 12px;
+    font-size: 14px;
+    font-family: 'Noto Sans KR', sans-serif;
+    background: #FBF5E4;
+    border: 1.5px solid var(--paper-shadow);
+    border-radius: 4px;
+    color: var(--ink);
+    outline: none;
+  }
+  .text-input-row input:focus { border-color: var(--gold); }
+
+  /* Feedback */
+  .feedback {
+    margin-top: 12px;
+    padding: 10px 14px;
+    border-radius: 4px;
+    font-size: 13px;
+    line-height: 1.6;
+    display: none;
+  }
+  .feedback.show { display: block; }
+  .feedback.correct { background: var(--success-light); color: var(--success); border-left: 4px solid var(--success); }
+  .feedback.wrong { background: var(--red-light); color: var(--red-seal); border-left: 4px solid var(--red-seal); }
+
+  .next-btn-row { margin-top: 12px; text-align: right; }
+
+  /* ─── HINT SYSTEM ─── */
+  .hint-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 8px;
+  }
+  .hint-btn {
+    font-size: 12px;
+    color: var(--gold);
+    background: none;
+    border: 1px solid var(--gold);
+    border-radius: 3px;
+    padding: 3px 10px;
+    cursor: pointer;
+  }
+  .hint-box {
+    font-size: 12px;
+    color: var(--brush);
+    background: var(--gold-light);
+    border: 1px solid var(--gold);
+    border-radius: 4px;
+    padding: 7px 10px;
+    margin-bottom: 8px;
+    display: none;
+    line-height: 1.6;
+  }
+  .hint-box.show { display: block; }
+
+  /* ─── LEADERBOARD ─── */
+  .leaderboard-panel {
+    background: var(--paper);
+    border: 3px double var(--paper-shadow);
+    border-radius: 4px;
+    padding: 16px;
+    margin-bottom: 10px;
+  }
+  .lb-header {
+    text-align: center;
+    margin-bottom: 14px;
+  }
+  .lb-header h2 {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 16px;
+    color: var(--ink);
+    letter-spacing: 2px;
+  }
+  .lb-header p { font-size: 12px; color: var(--brush); margin-top: 2px; }
+
+  .lb-table { width: 100%; border-collapse: collapse; }
+  .lb-table th {
+    font-size: 11px;
+    color: var(--brush);
+    font-weight: 700;
+    padding: 6px 8px;
+    border-bottom: 1.5px solid var(--paper-shadow);
+    text-align: left;
+    letter-spacing: 1px;
+  }
+  .lb-table td {
+    padding: 8px 8px;
+    font-size: 13px;
+    color: var(--ink);
+    border-bottom: 0.5px solid var(--paper-dark);
+  }
+  .lb-table tr.finished td { background: #FFFBEE; }
+  .lb-table tr.playing td { background: transparent; }
+  .rank-cell { font-weight: 700; font-family: 'Noto Serif KR', serif; font-size: 16px; width: 32px; }
+  .rank-1 { color: #C9960C; }
+  .rank-2 { color: #8A8A8A; }
+  .rank-3 { color: #9B5E2A; }
+
+  .lb-status {
+    display: inline-block;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .lb-status.escaped { background: var(--success-light); color: var(--success); }
+  .lb-status.playing { background: var(--gold-light); color: var(--gold); }
+  .lb-status.waiting { background: var(--paper-dark); color: var(--stage-locked); }
+
+  .refresh-note {
+    text-align: center;
+    font-size: 11px;
+    color: var(--stage-locked);
+    margin-top: 10px;
+  }
+
+  /* ─── COMPLETION ─── */
+  .completion-screen {
+    background: var(--paper);
+    border: 3px double var(--paper-shadow);
+    border-radius: 4px;
+    padding: 30px 20px;
+    text-align: center;
+    display: none;
+  }
+  .completion-screen.active { display: block; }
+  .seal-img {
+    font-size: 52px;
+    margin-bottom: 12px;
+    display: block;
+  }
+  .completion-screen h2 {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 20px;
+    color: var(--red-seal);
+    margin-bottom: 6px;
+    letter-spacing: 2px;
+  }
+  .completion-screen .team-result {
+    font-size: 14px;
+    color: var(--brush);
+    margin-bottom: 16px;
+  }
+  .completion-screen .rank-display {
+    font-size: 32px;
+    font-weight: 700;
+    font-family: 'Noto Serif KR', serif;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+  .time-display {
+    font-size: 16px;
+    color: var(--gold);
+    font-weight: 700;
+    margin-bottom: 20px;
+  }
+  .wrong-summary {
+    text-align: left;
+    background: #FBF5E4;
+    border: 1px solid var(--paper-shadow);
+    border-radius: 4px;
+    padding: 12px 14px;
+    margin-bottom: 16px;
+  }
+  .wrong-summary h3 {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--brush);
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+  }
+  .wrong-item {
+    font-size: 12px;
+    color: var(--ink);
+    padding: 4px 0;
+    border-bottom: 0.5px solid var(--paper-dark);
+    line-height: 1.6;
+  }
+  .wrong-item:last-child { border-bottom: none; }
+  .wrong-item strong { color: var(--red-seal); }
+
+  /* ─── TEACHER PANEL ─── */
+  .teacher-toggle {
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  .teacher-toggle button {
+    font-size: 12px;
+    color: var(--stage-locked);
+    background: none;
+    border: 1px solid var(--stage-locked);
+    border-radius: 3px;
+    padding: 4px 12px;
+    cursor: pointer;
+  }
+
+  /* ─── SETUP SCREEN ─── */
+  .setup-screen { }
+  .setup-screen.hidden { display: none; }
+  .start-game-section {
+    text-align: center;
+    padding: 10px;
+  }
+  .team-count-badge {
+    display: inline-block;
+    background: var(--gold-light);
+    border: 1px solid var(--gold);
+    border-radius: 3px;
+    padding: 4px 12px;
+    font-size: 13px;
+    color: var(--brush);
+    margin-bottom: 12px;
+  }
+
+  /* responsive */
+  @media (max-width: 480px) {
+    .choices { grid-template-columns: 1fr; }
+    .header h1 { font-size: 16px; }
+  }
+</style>
+</head>
+<body>
+<div class="game-container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <h1>🔐 <span>사림</span>의 비밀 문서함을 열어라!</h1>
+    <div class="subtitle">조선 역사 방탈출 — 자물쇠 5개를 모두 풀어야 탈출할 수 있다</div>
+  </div>
+
+  <!-- SETUP SCREEN -->
+  <div class="setup-screen" id="setupScreen">
+    <div class="setup-panel">
+      <h2><span>①</span> 팀 이름을 입력하세요</h2>
+      <div class="team-input-row">
+        <input type="text" id="teamNameInput" placeholder="예) 사헌부팀, 홍문관팀..." maxlength="12" />
+        <button class="btn-primary" onclick="addTeam()">추가</button>
+      </div>
+      <div class="teams-list" id="teamsList"></div>
+    </div>
+
+    <div class="leaderboard-panel" id="leaderboardSetup">
+      <div class="lb-header">
+        <h2>📜 현황판</h2>
+        <p>팀이 등록되면 여기에 표시됩니다</p>
+      </div>
+      <div id="leaderboardBody"></div>
+    </div>
+
+    <div class="start-game-section">
+      <div class="team-count-badge" id="teamCountBadge">등록된 팀: 0팀</div><br>
+      <button class="btn-primary" id="startBtn" onclick="startGame()" disabled style="padding: 12px 32px; font-size: 16px; letter-spacing: 2px;">
+        🔑 탈출 시작
+      </button>
+      <br><br>
+      <div style="font-size: 12px; color: var(--stage-locked);">
+        ※ 같은 링크를 공유하면 모든 팀이 동일한 페이지에서 플레이합니다.<br>
+        팀 이름을 입력한 뒤 각자 "나의 팀으로 플레이" 버튼을 누르세요.
+      </div>
+    </div>
+  </div>
+
+  <!-- TEAM SELECT (after teams registered) -->
+  <div id="teamSelectScreen" style="display:none;">
+    <div class="setup-panel">
+      <h2><span>②</span> 나의 팀을 선택하세요</h2>
+      <div id="teamSelectList" style="display:flex; flex-direction:column; gap:8px;"></div>
+    </div>
+  </div>
+
+  <!-- GAME SCREEN -->
+  <div class="game-screen" id="gameScreen">
+    <div class="team-bar">
+      <div class="team-name-display">팀: <span id="currentTeamName"></span></div>
+      <div class="timer-box" id="timerDisplay">15:00</div>
+    </div>
+
+    <div class="progress-row">
+      <div class="progress-label">
+        <span id="progressText">자물쇠 0 / 5 해제</span>
+        <span id="hintUsed"></span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill" style="width:0%"></div>
+      </div>
+      <div class="stage-dots" id="stageDots"></div>
+    </div>
+
+    <div class="question-card" id="questionCard">
+      <!-- Dynamic content -->
+    </div>
+  </div>
+
+  <!-- COMPLETION SCREEN -->
+  <div class="completion-screen" id="completionScreen">
+    <span class="seal-img">🎉</span>
+    <h2>탈출 성공!</h2>
+    <div class="team-result" id="completionTeam"></div>
+    <div class="rank-display" id="completionRank"></div>
+    <div class="time-display" id="completionTime"></div>
+    <div class="wrong-summary" id="wrongSummary" style="display:none;">
+      <h3>📖 틀린 문제 복습</h3>
+      <div id="wrongList"></div>
+    </div>
+    <button class="btn-primary" onclick="showLeaderboard()" style="margin-top:8px;">📜 전체 순위 보기</button>
+  </div>
+
+  <!-- LEADERBOARD PANEL (bottom) -->
+  <div class="leaderboard-panel" id="leaderboardLive" style="display:none;">
+    <div class="lb-header">
+      <h2>📜 탈출 현황판</h2>
+      <p id="lbSubtitle">실시간 업데이트</p>
+    </div>
+    <table class="lb-table">
+      <thead>
+        <tr>
+          <th>순위</th>
+          <th>팀 이름</th>
+          <th>진행</th>
+          <th>상태</th>
+          <th>시간</th>
+        </tr>
+      </thead>
+      <tbody id="lbTableBody"></tbody>
+    </table>
+    <div class="refresh-note">자동 업데이트 중...</div>
+  </div>
+
+</div>
+
+<script>
+// ───────────────────────────────────────────────
+// DATA
+// ───────────────────────────────────────────────
+const QUESTIONS = [
+  {
+    stage: 1,
+    lock: "자물쇠 1",
+    label: "훈구 vs 사림",
+    context: "조선 성종 때, 새로운 정치 세력이 등장했다. 그들은 지방 향촌에서 성리학을 연구하며 성장했고, 훈구 세력의 권력 독점을 비판했다.",
+    question: "훈구 세력과 사림 세력에 대한 설명으로 옳은 것은?",
+    hint: "훈구는 세조 때 공신, 사림은 향촌 성리학자!",
+    type: "choice",
+    options: [
+      "① 훈구는 향촌에서 성리학을 연구하며 세력을 키웠다.",
+      "② 사림은 세조 즉위 공신으로 많은 토지와 노비를 소유했다.",
+      "③ 사림은 성종 때 3사(사헌부·사간원·홍문관)에 배치되어 훈구를 비판했다.",
+      "④ 훈구는 현량과 실시를 주장하며 새로운 인재 등용을 꾀했다."
+    ],
+    answer: 2,
+    explanation: "사림은 성종 때 김종직 등이 대거 등용되어 언론기관인 3사에 배치되었습니다. 훈구는 세조 즉위 공신으로 토지와 노비를 많이 가진 세력이었습니다."
+  },
+  {
+    stage: 2,
+    lock: "자물쇠 2",
+    label: "4대 사화 순서",
+    context: "사림이 3사에서 훈구를 비판하자, 훈구는 왕권을 이용해 사림에게 큰 피해를 입혔다. 이를 '사화'라고 한다.",
+    question: "4대 사화를 일어난 순서대로 올바르게 배열하라!\n(항목을 드래그하여 순서를 맞추세요)",
+    hint: "무오→갑자→기묘→을사, 연산군(무오·갑자), 중종(기묘), 명종(을사)",
+    type: "order",
+    items: ["갑자사화 — 연산군 친모 폐위 사건", "을사사화 — 외척 대윤 vs 소윤 권력 다툼", "무오사화 — 김종직의 조의제문 발단", "기묘사화 — 조광조의 급진 개혁"],
+    answer: [2, 0, 3, 1],
+    explanation: "무오사화(연산군, 조의제문) → 갑자사화(연산군, 친모 폐위) → 기묘사화(중종, 조광조 개혁) → 을사사화(명종, 외척 권력다툼) 순서입니다."
+  },
+  {
+    stage: 3,
+    lock: "자물쇠 3",
+    label: "조의제문의 비밀",
+    context: "김종직이 쓴 「조의제문」은 중국의 의제와 항우 이야기를 담고 있다. 하지만 연산군은 이 글이 실제로는 조선의 특정 인물을 빗댄 것이라고 분노했다.",
+    question: "조의제문에서 억울하게 죽임을 당한 '의제'는 조선의 누구를 빗댄 것인가? (한 글자 한 글자 정확히 입력)",
+    hint: "세조에게 왕위를 빼앗기고 죽임당한 어린 왕...",
+    type: "text",
+    answer: ["단종"],
+    explanation: "의제는 단종, 항우는 세조를 빗댄 것입니다. 연산군은 자신의 증조할아버지 세조를 도적에 비유했다며 크게 분노하여 무오사화를 일으켰습니다."
+  },
+  {
+    stage: 4,
+    lock: "자물쇠 4",
+    label: "조광조의 개혁",
+    context: "중종은 훈구를 견제하기 위해 사림인 조광조를 등용했다. 조광조는 급진적인 개혁을 추진했지만, 훈구의 반발로 기묘사화가 발생했다.",
+    question: "조광조가 실시한 개혁 내용으로 옳지 않은 것은?",
+    hint: "현량과, 위훈 삭제, 소격서 폐지! 이 셋이 핵심",
+    type: "choice",
+    options: [
+      "① 현량과 — 과거 시험 없이 면접으로 사림 등용",
+      "② 위훈 삭제 — 중종 반정 가짜 공신들의 재산 몰수",
+      "③ 소격서 폐지 — 도교 제사 기관 철폐",
+      "④ 향약 폐지 — 지방 자치 규약 금지령 선포"
+    ],
+    answer: 3,
+    explanation: "조광조의 3대 개혁은 현량과 실시, 위훈 삭제, 소격서 폐지입니다. 향약은 오히려 사림이 지방 세력을 키우는 데 활용한 제도로, 조광조는 향약을 장려했습니다."
+  },
+  {
+    stage: 5,
+    lock: "자물쇠 5",
+    label: "붕당의 형성",
+    context: "4차례 사화를 겪으면서도 사림은 서원과 향약으로 세력을 유지했다. 결국 사림이 정권을 잡게 되었지만, 이번에는 사림 내부에서 분열이 생겼다.",
+    question: "붕당 형성의 원인이 된 직책과 동·서 붕당 형성에 대한 설명으로 옳은 것은?",
+    hint: "이조전랑 — 3사 관리 임명권 + 후임자 추천권!",
+    type: "choice",
+    options: [
+      "① 서인의 영수 김효원은 동쪽, 동인의 영수 심의겸은 서쪽에 살았다.",
+      "② 이조전랑은 3사 관리 임명과 후임자 추천권을 가진 핵심 직책이었다.",
+      "③ 붕당은 학문적·정치적 입장이 달라도 지역별로만 나뉘었다.",
+      "④ 동인은 나중에 훈구파와 사림파로 다시 나뉘었다."
+    ],
+    answer: 1,
+    explanation: "이조전랑은 3사 관리 임명과 후임자 추천권을 가진 핵심 직책입니다. 김효원(동인)과 심의겸(서인)이 이 자리를 두고 갈등하면서 동인·서인으로 분화되었습니다."
+  }
+];
+
+const TOTAL_TIME = 15 * 60; // 15분
+
+// ───────────────────────────────────────────────
+// STATE (shared via localStorage)
+// ───────────────────────────────────────────────
+function getState() {
+  try { return JSON.parse(localStorage.getItem('sarimEscape') || '{}'); } catch(e) { return {}; }
+}
+function setState(s) {
+  localStorage.setItem('sarimEscape', JSON.stringify(s));
+}
+function getTeams() {
+  const s = getState();
+  return s.teams || [];
+}
+function saveTeams(teams) {
+  const s = getState();
+  s.teams = teams;
+  setState(s);
+}
+function updateTeamData(name, data) {
+  const s = getState();
+  if (!s.teamData) s.teamData = {};
+  s.teamData[name] = Object.assign(s.teamData[name] || {}, data);
+  setState(s);
+}
+function getTeamData(name) {
+  const s = getState();
+  return (s.teamData || {})[name] || {};
+}
+function getAllTeamData() {
+  return getState().teamData || {};
+}
+
+// ───────────────────────────────────────────────
+// SETUP
+// ───────────────────────────────────────────────
+function addTeam() {
+  const input = document.getElementById('teamNameInput');
+  const name = input.value.trim();
+  if (!name) return;
+  const teams = getTeams();
+  if (teams.includes(name)) { alert('이미 있는 팀 이름입니다!'); return; }
+  if (teams.length >= 8) { alert('최대 8팀까지 등록 가능합니다.'); return; }
+  teams.push(name);
+  saveTeams(teams);
+  input.value = '';
+  renderSetup();
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.activeElement.id === 'teamNameInput') addTeam();
+});
+
+function removeTeam(name) {
+  const teams = getTeams().filter(t => t !== name);
+  saveTeams(teams);
+  renderSetup();
+}
+
+function renderSetup() {
+  const teams = getTeams();
+  // badges
+  const list = document.getElementById('teamsList');
+  list.innerHTML = teams.map(t => `
+    <div class="team-badge">
+      ${t}
+      <span class="remove" onclick="removeTeam('${t.replace(/'/g,"\\'")}')">×</span>
+    </div>
+  `).join('');
+
+  // count
+  const badge = document.getElementById('teamCountBadge');
+  if (badge) badge.textContent = `등록된 팀: ${teams.length}팀`;
+
+  // start btn
+  const startBtn = document.getElementById('startBtn');
+  if (startBtn) startBtn.disabled = teams.length < 1;
+
+  // leaderboard preview
+  renderLeaderboard('leaderboardBody');
+}
+
+function startGame() {
+  const teams = getTeams();
+  if (teams.length === 0) return;
+
+  // show team select
+  document.getElementById('setupScreen').classList.add('hidden');
+  const sel = document.getElementById('teamSelectScreen');
+  sel.style.display = 'block';
+
+  const selList = document.getElementById('teamSelectList');
+  selList.innerHTML = teams.map(t => {
+    const td = getTeamData(t);
+    const done = td.finished;
+    return `<button class="btn-primary" ${done ? 'disabled style="background:var(--stage-locked)"' : ''} onclick="selectTeam('${t.replace(/'/g,"\\'")}')">
+      ${done ? '✅ ' : ''}${t}${done ? ' (탈출 완료)' : ' 으로 플레이'}
+    </button>`;
+  }).join('');
+
+  renderLeaderboard('leaderboardBody');
+  document.getElementById('leaderboardSetup').style.display = 'block';
+}
+
+// ───────────────────────────────────────────────
+// GAME PLAY
+// ───────────────────────────────────────────────
+let currentTeam = '';
+let currentStage = 0;
+let timerInterval = null;
+let elapsedSeconds = 0;
+let wrongQuestions = [];
+let hintsUsed = 0;
+
+function selectTeam(name) {
+  currentTeam = name;
+  currentStage = 0;
+  elapsedSeconds = 0;
+  wrongQuestions = [];
+  hintsUsed = 0;
+
+  updateTeamData(name, { started: true, startTime: Date.now(), finished: false, stage: 0 });
+
+  document.getElementById('teamSelectScreen').style.display = 'none';
+  document.getElementById('leaderboardSetup').style.display = 'none';
+  document.getElementById('currentTeamName').textContent = name;
+
+  document.getElementById('gameScreen').classList.add('active');
+
+  renderStageDots();
+  loadQuestion(0);
+  startTimer();
+}
+
+function startTimer() {
+  if (timerInterval) clearInterval(timerInterval);
+  const timerEl = document.getElementById('timerDisplay');
+  timerInterval = setInterval(() => {
+    elapsedSeconds++;
+    const remaining = TOTAL_TIME - elapsedSeconds;
+    if (remaining <= 0) {
+      clearInterval(timerInterval);
+      timerEl.textContent = '00:00';
+      timerEl.classList.add('warning');
+      finishGame(true);
+      return;
+    }
+    const m = Math.floor(remaining / 60);
+    const s = remaining % 60;
+    timerEl.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    if (remaining <= 120) timerEl.classList.add('warning');
+  }, 1000);
+}
+
+function renderStageDots() {
+  const dots = document.getElementById('stageDots');
+  dots.innerHTML = QUESTIONS.map((q, i) => {
+    let cls = i < currentStage ? 'done' : i === currentStage ? 'current' : '';
+    let icon = i < currentStage ? '✓' : `${i+1}`;
+    return `<div class="stage-dot ${cls}">${icon}<br><span style="font-size:10px">${q.label}</span></div>`;
+  }).join('');
+}
+
+function updateProgress() {
+  const pct = (currentStage / QUESTIONS.length) * 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressText').textContent = `자물쇠 ${currentStage} / ${QUESTIONS.length} 해제`;
+  renderStageDots();
+  updateTeamData(currentTeam, { stage: currentStage });
+}
+
+function loadQuestion(idx) {
+  if (idx >= QUESTIONS.length) { finishGame(false); return; }
+  const q = QUESTIONS[idx];
+  const card = document.getElementById('questionCard');
+
+  let choiceHTML = '';
+  if (q.type === 'choice') {
+    choiceHTML = `<div class="choices" id="choicesDiv">
+      ${q.options.map((opt, i) => `
+        <button class="choice-btn" onclick="checkChoice(${i})" data-idx="${i}">${opt}</button>
+      `).join('')}
+    </div>`;
+  } else if (q.type === 'order') {
+    choiceHTML = buildOrderHTML(q);
+  } else if (q.type === 'text') {
+    choiceHTML = `<div class="text-input-row">
+      <input type="text" id="textAnswer" placeholder="정답을 입력하세요..." maxlength="10" />
+      <button class="btn-primary" onclick="checkText()">확인</button>
+    </div>`;
+  }
+
+  card.innerHTML = `
+    <div class="stage-label">🔒 ${q.lock} — ${q.label}</div>
+    <div class="q-context">${q.context}</div>
+    <div class="hint-row">
+      <button class="hint-btn" onclick="toggleHint()">💡 힌트</button>
+    </div>
+    <div class="hint-box" id="hintBox">${q.hint}</div>
+    <div class="q-text">${q.question.replace(/\n/g,'<br>')}</div>
+    ${choiceHTML}
+    <div class="feedback" id="feedback"></div>
+    <div class="next-btn-row" id="nextBtnRow" style="display:none;">
+      <button class="btn-primary" onclick="nextStage()">다음 자물쇠 →</button>
+    </div>
+  `;
+
+  if (q.type === 'text') {
+    document.getElementById('textAnswer').addEventListener('keydown', e => {
+      if (e.key === 'Enter') checkText();
+    });
+  }
+  if (q.type === 'order') initDrag();
+}
+
+function toggleHint() {
+  const box = document.getElementById('hintBox');
+  if (!box.classList.contains('show')) {
+    box.classList.add('show');
+    hintsUsed++;
+    document.getElementById('hintUsed').textContent = `힌트 ${hintsUsed}회 사용`;
+  }
+}
+
+// ─ Choice ─
+function checkChoice(idx) {
+  const q = QUESTIONS[currentStage];
+  const btns = document.querySelectorAll('.choice-btn');
+  btns.forEach(b => b.disabled = true);
+  const fb = document.getElementById('feedback');
+
+  if (idx === q.answer) {
+    btns[idx].classList.add('correct');
+    fb.className = 'feedback show correct';
+    fb.innerHTML = `🔓 정답! 자물쇠가 열렸습니다.<br><small>${q.explanation}</small>`;
+    showNext();
+  } else {
+    btns[idx].classList.add('wrong');
+    btns[q.answer].classList.add('correct');
+    fb.className = 'feedback show wrong';
+    fb.innerHTML = `❌ 틀렸습니다. 정답은 ${q.options[q.answer]}입니다.<br><small>${q.explanation}</small>`;
+    wrongQuestions.push({ stage: q.stage, label: q.label, correct: q.options[q.answer] });
+    showNext();
+  }
+}
+
+// ─ Order ─
+function buildOrderHTML(q) {
+  const shuffled = [...q.items];
+  shuffled.sort(() => Math.random() - 0.5);
+  return `
+    <ul class="order-list" id="orderList">
+      ${shuffled.map((item, i) => `
+        <li class="order-item" draggable="true" data-item="${item.replace(/"/g,'&quot;')}">
+          <span class="order-num">${i+1}</span>
+          <span>${item}</span>
+        </li>
+      `).join('')}
+    </ul>
+    <button class="order-check-btn" onclick="checkOrder()">순서 확인!</button>
+  `;
+}
+
+let dragSrc = null;
+function initDrag() {
+  const list = document.getElementById('orderList');
+  if (!list) return;
+  list.querySelectorAll('.order-item').forEach(item => {
+    item.addEventListener('dragstart', e => { dragSrc = item; item.classList.add('dragging'); });
+    item.addEventListener('dragend', e => { item.classList.remove('dragging'); list.querySelectorAll('.order-item').forEach(i => i.classList.remove('over')); });
+    item.addEventListener('dragover', e => { e.preventDefault(); item.classList.add('over'); });
+    item.addEventListener('dragleave', e => item.classList.remove('over'));
+    item.addEventListener('drop', e => {
+      e.preventDefault();
+      item.classList.remove('over');
+      if (dragSrc !== item) {
+        const items = [...list.querySelectorAll('.order-item')];
+        const srcIdx = items.indexOf(dragSrc);
+        const dstIdx = items.indexOf(item);
+        if (srcIdx < dstIdx) list.insertBefore(dragSrc, item.nextSibling);
+        else list.insertBefore(dragSrc, item);
+        items.forEach((it, i) => it.querySelector('.order-num').textContent = i+1);
+      }
+    });
+  });
+}
+
+function checkOrder() {
+  const q = QUESTIONS[currentStage];
+  const list = document.getElementById('orderList');
+  const currentOrder = [...list.querySelectorAll('.order-item')].map(el => el.dataset.item);
+  const correctOrder = q.answer.map(i => q.items[i]);
+  const isCorrect = currentOrder.every((item, i) => item === correctOrder[i]);
+
+  list.querySelectorAll('.order-item').forEach(el => el.setAttribute('draggable', false));
+  document.querySelector('.order-check-btn').disabled = true;
+  const fb = document.getElementById('feedback');
+
+  if (isCorrect) {
+    fb.className = 'feedback show correct';
+    fb.innerHTML = `🔓 완벽한 순서! 자물쇠가 열렸습니다.<br><small>${q.explanation}</small>`;
+    showNext();
+  } else {
+    fb.className = 'feedback show wrong';
+    fb.innerHTML = `❌ 순서가 맞지 않습니다.<br>정답: ${correctOrder.map((v,i)=>`${i+1}. ${v}`).join(' → ')}<br><small>${q.explanation}</small>`;
+    wrongQuestions.push({ stage: q.stage, label: q.label, correct: correctOrder.join(' → ') });
+    showNext();
+  }
+}
+
+// ─ Text ─
+function checkText() {
+  const q = QUESTIONS[currentStage];
+  const val = document.getElementById('textAnswer').value.trim();
+  const correct = q.answer.some(a => a === val || a.toLowerCase() === val.toLowerCase());
+  const fb = document.getElementById('feedback');
+  document.getElementById('textAnswer').disabled = true;
+
+  if (correct) {
+    fb.className = 'feedback show correct';
+    fb.innerHTML = `🔓 정답! 자물쇠가 열렸습니다.<br><small>${q.explanation}</small>`;
+    showNext();
+  } else {
+    fb.className = 'feedback show wrong';
+    fb.innerHTML = `❌ 틀렸습니다. 정답: <strong>${q.answer[0]}</strong><br><small>${q.explanation}</small>`;
+    wrongQuestions.push({ stage: q.stage, label: q.label, correct: q.answer[0] });
+    showNext();
+  }
+}
+
+function showNext() {
+  currentStage++;
+  updateProgress();
+  document.getElementById('nextBtnRow').style.display = 'block';
+}
+
+function nextStage() {
+  if (currentStage >= QUESTIONS.length) { finishGame(false); }
+  else loadQuestion(currentStage);
+}
+
+// ───────────────────────────────────────────────
+// FINISH
+// ───────────────────────────────────────────────
+function finishGame(timeout) {
+  clearInterval(timerInterval);
+  const elapsed = elapsedSeconds;
+  const m = Math.floor(elapsed / 60);
+  const s = elapsed % 60;
+  const timeStr = `${String(m).padStart(2,'0')}분 ${String(s).padStart(2,'0')}초`;
+
+  updateTeamData(currentTeam, { finished: true, finishTime: elapsed, hintsUsed });
+
+  document.getElementById('gameScreen').classList.remove('active');
+  const comp = document.getElementById('completionScreen');
+  comp.classList.add('active');
+
+  // rank
+  const allData = getAllTeamData();
+  const finishedTeams = Object.entries(allData)
+    .filter(([n, d]) => d.finished)
+    .sort((a, b) => (a[1].finishTime || 9999) - (b[1].finishTime || 9999));
+  const rank = finishedTeams.findIndex(([n]) => n === currentTeam) + 1;
+  const rankEmoji = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `${rank}위`;
+
+  document.getElementById('completionTeam').textContent = `${currentTeam} 팀`;
+  document.getElementById('completionRank').textContent = rankEmoji;
+  document.getElementById('completionTime').textContent = `⏱ 소요 시간: ${timeStr}`;
+
+  if (wrongQuestions.length > 0) {
+    const wsum = document.getElementById('wrongSummary');
+    wsum.style.display = 'block';
+    document.getElementById('wrongList').innerHTML = wrongQuestions.map(w =>
+      `<div class="wrong-item"><strong>[${w.label}]</strong> 정답: ${w.correct}</div>`
+    ).join('');
+  }
+}
+
+function showLeaderboard() {
+  document.getElementById('completionScreen').classList.remove('active');
+  document.getElementById('leaderboardLive').style.display = 'block';
+  renderLeaderboard('lbTableBody');
+  setInterval(() => renderLeaderboard('lbTableBody'), 3000);
+}
+
+// ───────────────────────────────────────────────
+// LEADERBOARD RENDER
+// ───────────────────────────────────────────────
+function renderLeaderboard(targetId) {
+  const teams = getTeams();
+  const allData = getAllTeamData();
+
+  const rows = teams.map(name => {
+    const td = allData[name] || {};
+    return {
+      name,
+      stage: td.stage || 0,
+      finished: td.finished || false,
+      finishTime: td.finishTime || null,
+      started: td.started || false
+    };
+  });
+
+  rows.sort((a, b) => {
+    if (a.finished && b.finished) return (a.finishTime||9999) - (b.finishTime||9999);
+    if (a.finished) return -1;
+    if (b.finished) return 1;
+    return b.stage - a.stage;
+  });
+
+  const tbody = document.getElementById(targetId);
+  if (!tbody) return;
+  tbody.innerHTML = rows.map((r, i) => {
+    const rank = i + 1;
+    const rankClass = rank <= 3 ? `rank-${rank}` : '';
+    let statusHTML = '';
+    let timeCell = '-';
+    let rowClass = 'playing';
+
+    if (r.finished) {
+      const m = Math.floor(r.finishTime / 60);
+      const s = r.finishTime % 60;
+      timeCell = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+      statusHTML = `<span class="lb-status escaped">탈출!</span>`;
+      rowClass = 'finished';
+    } else if (r.started) {
+      statusHTML = `<span class="lb-status playing">진행중</span>`;
+    } else {
+      statusHTML = `<span class="lb-status waiting">대기</span>`;
+    }
+
+    const stageBar = r.finished ? '■■■■■' : '■'.repeat(r.stage) + '□'.repeat(5 - r.stage);
+
+    return `<tr class="${rowClass}">
+      <td class="rank-cell ${rankClass}">${rank}</td>
+      <td>${r.name}</td>
+      <td style="font-family:monospace; font-size:13px; letter-spacing:2px; color:var(--gold)">${stageBar}</td>
+      <td>${statusHTML}</td>
+      <td style="font-size:13px; color:var(--brush)">${timeCell}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ───────────────────────────────────────────────
+// INIT
+// ───────────────────────────────────────────────
+renderSetup();
+</script>
+</body>
+</html>
