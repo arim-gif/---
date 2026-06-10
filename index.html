@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>조선의 스파이: 사림파를 구하고 붕당의 비밀을 풀어라!</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700&family=Noto+Sans+KR:wght@400;500;700&display=swap');
+
+:root {
+  --ink: #1E1208;
+  --paper: #F7EDD4;
+  --paper-mid: #EDD9A3;
+  --paper-dark: #D4B97A;
+  --red: #8B1A2A;
+  --red-light: #F5DCDC;
+  --gold: #7A5C10;
+  --gold-light: #F5E4A0;
+  --brown: #3E2510;
+  --green: #1A5C30;
+  --green-light: #D0ECD8;
+  --gray: #8A7A68;
+  --border: 2px solid #C4A060;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  background: #1A0F06;
+  min-height: 100vh;
+  padding: 10px;
+  background-image:
+    repeating-linear-gradient(0deg, transparent, transparent 49px, rgba(180,140,80,0.06) 50px),
+    repeating-linear-gradient(90deg, transparent, transparent 49px, rgba(180,140,80,0.06) 50px);
+}
+
+.wrap { max-width: 680px; margin: 0 auto; }
+
+/* ── 공통 카드 ── */
+.card {
+  background: var(--paper);
+  border: var(--border);
+  border-radius: 4px;
+  margin-bottom: 10px;
+  position: relative;
+  overflow: hidden;
+}
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: var(--red);
+}
+.card-body { padding: 16px 18px 18px; }
+
+/* ── 헤더 ── */
+.game-header {
+  background: var(--paper);
+  border: 3px double var(--paper-dark);
+  border-radius: 4px;
+  padding: 14px 18px 10px;
+  text-align: center;
+  margin-bottom: 10px;
+  position: relative;
+}
+.game-header::before, .game-header::after {
+  content: '◈'; position: absolute; top: 10px;
+  color: var(--gold); font-size: 16px;
+}
+.game-header::before { left: 14px; }
+.game-header::after  { right: 14px; }
+.game-header h1 {
+  font-family: 'Noto Serif KR', serif;
+  font-size: 17px; color: var(--ink);
+  letter-spacing: 1px; line-height: 1.5;
+}
+.game-header h1 em { color: var(--red); font-style: normal; }
+.game-header p { font-size: 11px; color: var(--brown); margin-top: 3px; letter-spacing: 0.5px; }
+
+/* ── 팀 등록 ── */
+.section-title {
+  font-family: 'Noto Serif KR', serif;
+  font-size: 14px; color: var(--ink);
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--paper-dark);
+  letter-spacing: 1px;
+}
+.section-title span { color: var(--red); font-size: 17px; margin-right: 4px; }
+
+.input-row { display: flex; gap: 8px; margin-bottom: 10px; }
+.input-row input {
+  flex: 1; padding: 9px 12px; font-size: 14px;
+  font-family: 'Noto Sans KR', sans-serif;
+  background: #FDF6E3; border: 1.5px solid var(--paper-dark);
+  border-radius: 4px; color: var(--ink); outline: none;
+}
+.input-row input:focus { border-color: var(--gold); }
+.input-row input::placeholder { color: var(--gray); }
+
+.btn-red {
+  padding: 9px 16px; font-size: 14px;
+  font-family: 'Noto Sans KR', sans-serif; font-weight: 700;
+  background: var(--red); color: #FFF;
+  border: none; border-radius: 4px;
+  cursor: pointer; letter-spacing: 1px;
+  transition: opacity .15s;
+}
+.btn-red:hover { opacity: .85; }
+.btn-red:disabled { background: var(--gray); cursor: not-allowed; }
+
+.btn-outline {
+  padding: 8px 14px; font-size: 13px;
+  font-family: 'Noto Sans KR', sans-serif;
+  background: transparent; color: var(--brown);
+  border: 1.5px solid var(--paper-dark);
+  border-radius: 4px; cursor: pointer;
+  transition: background .15s;
+}
+.btn-outline:hover { background: var(--paper-mid); }
+
+.teams-wrap { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.team-tag {
+  background: var(--gold-light); border: 1px solid var(--gold);
+  border-radius: 3px; padding: 4px 10px;
+  font-size: 13px; color: var(--ink);
+  display: flex; align-items: center; gap: 6px;
+}
+.team-tag .x { cursor: pointer; color: var(--red); font-weight: 700; font-size: 15px; line-height: 1; }
+
+.team-count { font-size: 12px; color: var(--brown); margin-bottom: 10px; }
+
+/* ── 팀 선택 ── */
+.team-select-list { display: flex; flex-direction: column; gap: 8px; }
+
+/* ── 게임바 ── */
+.game-bar {
+  background: var(--paper);
+  border: var(--border); border-radius: 4px;
+  padding: 10px 16px; margin-bottom: 8px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.team-label { font-family: 'Noto Serif KR', serif; font-size: 14px; color: var(--ink); }
+.team-label strong { color: var(--red); }
+.timer {
+  font-size: 22px; font-weight: 700;
+  font-family: 'Noto Serif KR', serif;
+  color: var(--ink); min-width: 70px; text-align: right;
+}
+.timer.warn { color: var(--red); }
+
+/* ── 진행바 ── */
+.prog-card {
+  background: var(--paper); border: var(--border);
+  border-radius: 4px; padding: 10px 16px; margin-bottom: 8px;
+}
+.prog-meta { display: flex; justify-content: space-between; font-size: 11px; color: var(--brown); margin-bottom: 5px; }
+.prog-track { height: 7px; background: var(--paper-mid); border-radius: 4px; overflow: hidden; }
+.prog-fill { height: 100%; background: var(--gold); border-radius: 4px; transition: width .4s; }
+.stage-row { display: flex; justify-content: space-between; margin-top: 6px; }
+.s-dot { flex: 1; text-align: center; font-size: 10px; color: var(--gray); }
+.s-dot.done  { color: var(--green); font-weight: 700; }
+.s-dot.cur   { color: var(--red);   font-weight: 700; }
+
+/* ── 문제 카드 ── */
+.q-card { background: var(--paper); border: var(--border); border-radius: 4px; padding: 16px 18px 18px; margin-bottom: 8px; position: relative; overflow: hidden; }
+.q-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--red); }
+
+.stage-badge {
+  display: inline-block; background: var(--red); color: #FFF;
+  font-size: 11px; font-weight: 700; padding: 3px 10px;
+  border-radius: 3px; letter-spacing: 1px; margin-bottom: 10px;
+}
+.story-box {
+  font-size: 12px; color: var(--brown);
+  background: var(--paper-mid);
+  border-left: 3px solid var(--gold);
+  padding: 8px 10px; border-radius: 0 4px 4px 0;
+  margin-bottom: 12px; line-height: 1.7;
+}
+.story-box strong { color: var(--red); }
+
+.hint-row { display: flex; justify-content: flex-end; margin-bottom: 8px; }
+.hint-btn {
+  font-size: 12px; color: var(--gold);
+  background: none; border: 1px solid var(--gold);
+  border-radius: 3px; padding: 3px 10px; cursor: pointer;
+}
+.hint-box {
+  font-size: 12px; color: var(--brown);
+  background: var(--gold-light); border: 1px solid var(--gold);
+  border-radius: 4px; padding: 7px 10px;
+  margin-bottom: 8px; display: none; line-height: 1.6;
+}
+.hint-box.on { display: block; }
+
+.q-text {
+  font-family: 'Noto Serif KR', serif;
+  font-size: 15px; color: var(--ink);
+  line-height: 1.8; margin-bottom: 14px; font-weight: 700;
+}
+
+/* ── 선택지 ── */
+.choices { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.choices.col1 { grid-template-columns: 1fr; }
+.choice {
+  padding: 10px 13px; font-size: 13px;
+  font-family: 'Noto Sans KR', sans-serif;
+  background: #FDF6E3; border: 1.5px solid var(--paper-dark);
+  border-radius: 4px; cursor: pointer;
+  text-align: left; color: var(--ink);
+  transition: border-color .15s, background .15s;
+  line-height: 1.5;
+}
+.choice:hover:not(:disabled) { border-color: var(--gold); background: var(--gold-light); }
+.choice.ok   { border-color: var(--green); background: var(--green-light); color: var(--green); font-weight: 700; }
+.choice.bad  { border-color: var(--red);   background: var(--red-light);   color: var(--red); }
+.choice:disabled { cursor: default; }
+
+/* ── 텍스트 입력 ── */
+.text-row { display: flex; gap: 8px; margin-top: 4px; }
+.text-row input {
+  flex: 1; padding: 9px 12px; font-size: 14px;
+  font-family: 'Noto Sans KR', sans-serif;
+  background: #FDF6E3; border: 1.5px solid var(--paper-dark);
+  border-radius: 4px; color: var(--ink); outline: none;
+}
+.text-row input:focus { border-color: var(--gold); }
+
+/* ── 피드백 ── */
+.fb { margin-top: 12px; padding: 10px 13px; border-radius: 4px; font-size: 13px; line-height: 1.7; display: none; }
+.fb.on { display: block; }
+.fb.ok  { background: var(--green-light); color: var(--green); border-left: 4px solid var(--green); }
+.fb.bad { background: var(--red-light);   color: var(--red);   border-left: 4px solid var(--red); }
+
+.next-row { margin-top: 12px; text-align: right; }
+
+/* ── 순위판 ── */
+.lb-card {
+  background: var(--paper); border: 3px double var(--paper-dark);
+  border-radius: 4px; padding: 16px; margin-bottom: 10px;
+}
+.lb-head { text-align: center; margin-bottom: 14px; }
+.lb-head h2 { font-family: 'Noto Serif KR', serif; font-size: 16px; color: var(--ink); letter-spacing: 2px; }
+.lb-head p  { font-size: 11px; color: var(--brown); margin-top: 2px; }
+
+.lb-table { width: 100%; border-collapse: collapse; }
+.lb-table th { font-size: 11px; color: var(--brown); font-weight: 700; padding: 5px 8px; border-bottom: 1.5px solid var(--paper-dark); text-align: left; letter-spacing: 1px; }
+.lb-table td { padding: 8px 8px; font-size: 13px; color: var(--ink); border-bottom: 0.5px solid var(--paper-mid); }
+.lb-table tr.done-row td { background: #FFFBEE; }
+.rank-cell { font-weight: 700; font-family: 'Noto Serif KR', serif; font-size: 16px; width: 30px; }
+.r1 { color: #C9960C; } .r2 { color: #888; } .r3 { color: #9B5E2A; }
+
+.status-badge {
+  display: inline-block; font-size: 11px; padding: 2px 8px;
+  border-radius: 3px; font-weight: 700; letter-spacing: 0.5px;
+}
+.s-escaped { background: var(--green-light); color: var(--green); }
+.s-playing  { background: var(--gold-light);  color: var(--gold); }
+.s-wait     { background: var(--paper-mid);   color: var(--gray); }
+
+/* ── 완료 화면 ── */
+.done-card {
+  background: var(--paper); border: 3px double var(--paper-dark);
+  border-radius: 4px; padding: 28px 20px;
+  text-align: center; display: none;
+}
+.done-card.on { display: block; }
+.done-card h2 { font-family: 'Noto Serif KR', serif; font-size: 22px; color: var(--red); letter-spacing: 2px; margin-bottom: 6px; }
+.done-card .dt { font-size: 13px; color: var(--brown); margin-bottom: 14px; }
+.done-card .rank-big { font-size: 44px; margin: 8px 0; }
+.done-card .time-big { font-size: 18px; font-weight: 700; color: var(--gold); margin-bottom: 20px; }
+
+.review-box {
+  text-align: left; background: #FDF6E3;
+  border: 1px solid var(--paper-dark); border-radius: 4px;
+  padding: 12px 14px; margin-bottom: 16px;
+}
+.review-box h3 { font-size: 13px; font-weight: 700; color: var(--brown); margin-bottom: 8px; letter-spacing: 1px; }
+.review-item { font-size: 12px; color: var(--ink); padding: 4px 0; border-bottom: 0.5px solid var(--paper-mid); line-height: 1.6; }
+.review-item:last-child { border-bottom: none; }
+.review-item strong { color: var(--red); }
+
+/* ── 화면 전환 ── */
+.screen { display: none; }
+.screen.on { display: block; }
+
+@media (max-width: 480px) {
+  .choices { grid-template-columns: 1fr; }
+  .game-header h1 { font-size: 14px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- 헤더 -->
+<div class="game-header">
+  <h1>🕵️ 조선의 스파이<br><em>사림파를 구하고 붕당의 비밀을 풀어라!</em></h1>
+  <p>성종 시대 암행어사가 되어 4개의 관문을 돌파하라 — 제한시간 15분</p>
+</div>
+
+<!-- ① 팀 등록 화면 -->
+<div class="screen on" id="s-register">
+  <div class="card"><div class="card-body">
+    <div class="section-title"><span>①</span> 팀 이름 등록</div>
+    <div class="input-row">
+      <input id="teamInput" type="text" placeholder="예) 사헌부팀, 홍문관팀..." maxlength="12" />
+      <button class="btn-red" onclick="addTeam()">추가</button>
+    </div>
+    <div class="teams-wrap" id="teamWrap"></div>
+  </div></div>
+
+  <div class="lb-card" id="lbRegister">
+    <div class="lb-head"><h2>📜 현황판</h2><p>팀을 등록하면 여기에 표시됩니다</p></div>
+    <div id="lbRegisterBody"></div>
+  </div>
+
+  <div style="text-align:center; padding: 8px 0 14px;">
+    <div class="team-count" id="teamCountTxt">등록된 팀: 0팀</div>
+    <button class="btn-red" id="startBtn" onclick="goSelect()" disabled style="padding:12px 36px; font-size:16px; letter-spacing:2px;">
+      🔑 관문 시작
+    </button>
+    <p style="font-size:11px; color:#8A7A68; margin-top:10px;">
+      ※ 같은 링크를 공유하고 팀별로 "나의 팀으로 시작" 버튼을 누르면 됩니다.
+    </p>
+  </div>
+</div>
+
+<!-- ② 팀 선택 화면 -->
+<div class="screen" id="s-select">
+  <div class="card"><div class="card-body">
+    <div class="section-title"><span>②</span> 나의 팀 선택</div>
+    <div class="team-select-list" id="selectList"></div>
+  </div></div>
+</div>
+
+<!-- ③ 게임 화면 -->
+<div class="screen" id="s-game">
+  <div class="game-bar">
+    <div class="team-label">팀: <strong id="curTeamName"></strong></div>
+    <div class="timer" id="timerEl">15:00</div>
+  </div>
+  <div class="prog-card">
+    <div class="prog-meta">
+      <span id="progTxt">관문 0 / 4 통과</span>
+      <span id="hintTxt"></span>
+    </div>
+    <div class="prog-track"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+    <div class="stage-row" id="stageDots"></div>
+  </div>
+  <div id="qArea"></div>
+</div>
+
+<!-- ④ 완료 화면 -->
+<div class="done-card" id="s-done">
+  <div style="font-size:52px; margin-bottom:6px;">🎉</div>
+  <h2>임무 완료!</h2>
+  <div class="dt" id="doneTeam"></div>
+  <div class="rank-big" id="doneRank"></div>
+  <div class="time-big" id="doneTime"></div>
+  <div class="review-box" id="reviewBox" style="display:none;">
+    <h3>📖 틀린 문제 복습</h3>
+    <div id="reviewList"></div>
+  </div>
+  <button class="btn-red" onclick="showLiveBoard()" style="margin-top:4px;">📜 전체 순위 보기</button>
+</div>
+
+<!-- 순위판 (하단) -->
+<div class="lb-card" id="lbLive" style="display:none;">
+  <div class="lb-head"><h2>📜 탈출 현황판</h2><p id="lbSub">실시간 업데이트 중...</p></div>
+  <table class="lb-table">
+    <thead><tr><th>순위</th><th>팀 이름</th><th>진행</th><th>상태</th><th>시간</th></tr></thead>
+    <tbody id="lbBody"></tbody>
+  </table>
+</div>
+
+</div><!-- /wrap -->
+
+<script>
+// ═══════════════════════════════════════
+// 문제 데이터
+// ═══════════════════════════════════════
+const GATES = [
+  {
+    id: 1,
+    badge: "🚪 제1관문: 권력의 감시자, 3사의 비밀번호",
+    story: `사림파 선비들이 성종 임금의 등용을 받아 궁궐에 들어왔습니다.<br>
+훈구파의 권력 독점을 감시하기 위해 언론기관 <strong>'3사'</strong>에 배치되었습니다.<br>
+3사의 비밀 작전 기지의 문을 열려면 각 기관의 임무를 정확히 맞춰야 합니다!`,
+    questions: [
+      {
+        q: "Q1. 관리들이 나쁜 짓을 하지 않는지 감시하는, 오늘날의 감사원 같은 곳은?",
+        hint: '💡 "법 앞에는 귀천이 없다! 최고 권력자 우의정 한치형의 노비도 처벌한다!"',
+        type: "choice",
+        options: ["① 홍문관", "② 사간원", "③ 사헌부", "④ 이조전랑"],
+        answer: 2,
+        exp: "사헌부는 관리들의 비위를 감찰하는 기관으로, 오늘날의 감사원에 해당합니다."
+      },
+      {
+        q: 'Q2. 왕이 매사냥에 빠지려 할 때 "전하, 그것은 아니되옵니다!"라며 목숨 걸고 바른말을 하던 곳은?',
+        hint: "💡 밤낮으로 대궐 앞에 엎드려 상소를 올린 끝에 성종이 아끼던 매를 궁궐 밖으로 날려 보내게 만든 곳!",
+        type: "choice",
+        options: ["① 사헌부", "② 사간원", "③ 홍문관", "④ 성균관"],
+        answer: 1,
+        exp: "사간원은 왕의 잘못된 결정에 직언하는 기관입니다. 성종의 매사냥을 막아낸 일화로 유명합니다."
+      },
+      {
+        q: "Q3. 왕을 보좌하는 학문 연구소이자, 훈구 세력의 나쁜 짓을 밝혀내는 국가 연구기관은?",
+        hint: "💡 왕의 자문을 담당하면서도 훈구 세력 견제의 역할도 맡은 곳!",
+        type: "choice",
+        options: ["① 사간원", "② 사헌부", "③ 홍문관", "④ 소격서"],
+        answer: 2,
+        exp: "홍문관은 왕을 보좌하는 학문 연구기관으로, 사헌부·사간원과 함께 3사를 이룹니다."
+      },
+      {
+        q: "🔑 패스워드: 사헌부·사간원·홍문관을 합쳐 숫자를 포함해 2글자로 뭐라고 부를까요?",
+        hint: "💡 3개의 언론기관을 묶어 부르는 말!",
+        type: "text",
+        answer: ["3사", "삼사"],
+        exp: "사헌부·사간원·홍문관 세 기관을 묶어 '3사'라고 합니다. 사림은 이 3사를 통해 훈구를 견제했습니다."
+      }
+    ]
+  },
+  {
+    id: 2,
+    badge: "🚪 제2관문: 조의제문 속 '암호명'을 풀어라!",
+    story: `성종의 뒤를 이어 연산군이 왕이 되었습니다.<br>
+훈구파들이 김종직의 <strong>「조의제문」</strong>을 들고 와 연산군을 자극합니다.<br>
+"이 글은 전하의 증조할아버지를 도적으로 비유한 글입니다!"<br>
+첫 번째 사화 <strong>[무오사화]</strong>가 터지기 직전! 글 속 진짜 인물을 찾아내세요!`,
+    questions: [
+      {
+        q: '「조의제문」에서 "억울하게 죽임당한 의제"와 "왕위를 빼앗은 항우"는 실제 조선의 누구를 빗댄 것인가?',
+        hint: "💡 세조에게 왕위를 빼앗기고 죽임을 당한 어린 왕을 떠올려 보세요!",
+        type: "choice",
+        options: [
+          "① 의제 = 세조, 항우 = 단종",
+          "② 의제 = 단종, 항우 = 세조",
+          "③ 의제 = 연산군, 항우 = 성종",
+          "④ 의제 = 조광조, 항우 = 중종"
+        ],
+        answer: 1,
+        exp: "의제는 단종, 항우는 세조를 빗댄 것입니다. 연산군은 증조할아버지 세조를 도적에 비유했다며 분노해 무오사화를 일으켰고, 김종직의 무덤을 파헤쳐 시신의 목을 베는 부관참시를 명했습니다."
+      }
+    ]
+  },
+  {
+    id: 3,
+    badge: "🚪 제3관문: 조광조의 개혁을 멈추게 한 '나뭇잎'",
+    story: `연산군이 쫓겨나고 <strong>중종</strong>이 즉위했습니다!<br>
+중종은 훈구파를 견제하기 위해 사림파의 리더 <strong>조광조</strong>를 등용합니다.<br>
+조광조는 폭풍 같은 개혁을 시작하지만, 훈구파의 엄청난 반발을 사게 됩니다.<br>
+개혁 내용을 정확히 파악해 기묘사화의 진실을 밝히세요!`,
+    questions: [
+      {
+        q: "다음 중 조광조가 추진한 급진적인 개혁 내용으로 올바르지 않은 것은?",
+        hint: "💡 현량과·위훈 삭제·소격서 폐지가 조광조의 3대 개혁! 나머지 하나는 연산군이 한 일입니다.",
+        type: "choice",
+        options: [
+          "① 현량과 — 과거 없이 면접으로 사림파 대거 등용",
+          "② 위훈 삭제 — 가짜 공신 76명의 공훈 삭제·재산 몰수",
+          "③ 소격서 폐지 — 왕실 도교 제사 기관을 미신이라 철폐",
+          "④ 흥청망청 — 전국 여성 뽑아 성균관을 노래방으로 개조"
+        ],
+        answer: 3,
+        exp: "④는 연산군이 한 일입니다. 조광조의 3대 개혁은 현량과 실시, 위훈 삭제, 소격서 폐지입니다. 훈구파는 나뭇잎에 꿀로 '주초위왕(走肖爲王)'을 써서 조광조를 역모로 몰았고, 결국 기묘사화가 발생했습니다."
+      }
+    ]
+  },
+  {
+    id: 4,
+    badge: "🚪 제4관문: 불사조 사림파, 붕당의 탄생",
+    story: `4차례 사화(무오·갑자·기묘·을사)에도 사림파는 살아남아 조선 정권의 주인이 됩니다!<br>
+비밀 무기는 <strong>서원</strong>(지방 성리학 교육기관)과 <strong>향약</strong>(지방 자치 규칙)이었습니다.<br>
+하지만 정권을 잡은 사림파 내부에서 이번엔 <strong>분열</strong>이 시작됩니다...`,
+    questions: [
+      {
+        q: "사림파가 중앙에서 쫓겨나도 지방에서 인재를 키워 끊임없이 중앙으로 진출시킨 '지방 사립 성리학 교육기관'은?",
+        hint: "💡 지방에 세워진 사학 교육기관으로 사림의 '무한 복제 기지' 역할을 했습니다.",
+        type: "text",
+        answer: ["서원"],
+        exp: "서원은 지방에 세워진 사립 성리학 교육기관으로, 사림이 아무리 사화를 당해도 세력이 줄지 않은 핵심 이유입니다."
+      },
+      {
+        q: "사림파가 직접 작성해 백성들의 삶을 도덕적으로 통제하고 강력한 지방 여론을 형성한 '지방 자치 규칙'은?",
+        hint: "💡 효도, 신의 등 도덕적 규칙을 만들어 지방 사회를 실질적으로 지배한 제도입니다.",
+        type: "text",
+        answer: ["향약"],
+        exp: "향약은 사림이 지방 사회를 장악한 핵심 도구로, 지방 여론을 형성해 훈구파도 무시할 수 없는 정치적 압박 카드가 되었습니다."
+      },
+      {
+        q: "이조전랑 임명 문제로 사림이 동인과 서인으로 갈라졌습니다. 동인의 중심 김효원과 서인의 중심 심의겸 — 두 붕당 이름의 유래로 옳은 것은?",
+        hint: "💡 두 사람이 살던 집의 방향(동쪽/서쪽)에서 이름이 유래했습니다!",
+        type: "choice",
+        options: [
+          "① 남인과 북인으로 먼저 나뉜 뒤 동·서로 분화",
+          "② 김효원(동쪽 거주)→동인, 심의겸(서쪽 거주)→서인",
+          "③ 학문 연구 방향(동방·서방)에서 유래",
+          "④ 훈구파가 붙여준 이름에서 유래"
+        ],
+        answer: 1,
+        exp: "김효원이 동쪽, 심의겸이 서쪽에 살았던 것에서 동인·서인의 이름이 유래했습니다. 이조전랑의 3사 관리 임명권과 후임자 추천권을 둘러싼 갈등이 분열의 시작이었습니다."
+      }
+    ]
+  }
+];
+
+const TOTAL_SEC = 15 * 60;
+
+// ═══════════════════════════════════════
+// 상태
+// ═══════════════════════════════════════
+function gs() { try { return JSON.parse(localStorage.getItem('joseonEscape')||'{}'); } catch(e){ return {}; } }
+function ss(d) { localStorage.setItem('joseonEscape', JSON.stringify(d)); }
+function getTeams() { return gs().teams || []; }
+function saveTeams(t) { const d=gs(); d.teams=t; ss(d); }
+function setTD(name, data) { const d=gs(); if(!d.td)d.td={}; d.td[name]=Object.assign(d.td[name]||{},data); ss(d); }
+function getTD(name) { return (gs().td||{})[name]||{}; }
+function getAllTD() { return gs().td||{}; }
+
+// ═══════════════════════════════════════
+// 팀 등록
+// ═══════════════════════════════════════
+function addTeam() {
+  const inp = document.getElementById('teamInput');
+  const nm = inp.value.trim();
+  if (!nm) return;
+  const teams = getTeams();
+  if (teams.includes(nm)) { alert('이미 있는 팀 이름!'); return; }
+  if (teams.length >= 9) { alert('최대 9팀까지 가능합니다.'); return; }
+  teams.push(nm); saveTeams(teams); inp.value = '';
+  renderRegister();
+}
+document.addEventListener('keydown', e => {
+  if (e.key==='Enter' && document.activeElement.id==='teamInput') addTeam();
+});
+function removeTeam(nm) {
+  saveTeams(getTeams().filter(t=>t!==nm)); renderRegister();
+}
+function renderRegister() {
+  const teams = getTeams();
+  document.getElementById('teamWrap').innerHTML = teams.map(t=>
+    `<div class="team-tag">${t}<span class="x" onclick="removeTeam('${esc(t)}')">×</span></div>`
+  ).join('');
+  document.getElementById('teamCountTxt').textContent = `등록된 팀: ${teams.length}팀`;
+  document.getElementById('startBtn').disabled = teams.length < 1;
+  renderLB('lbRegisterBody');
+}
+
+function goSelect() {
+  show('s-select');
+  const teams = getTeams();
+  document.getElementById('selectList').innerHTML = teams.map(t => {
+    const td = getTD(t);
+    const done = td.finished;
+    return `<button class="btn-red" ${done?'disabled style="background:var(--gray)"':''} onclick="startPlay('${esc(t)}')">
+      ${done?'✅ ':''}${t}${done?' (탈출 완료)':' 으로 시작'}
+    </button>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════
+// 게임 플레이 상태
+// ═══════════════════════════════════════
+let curTeam='', gateIdx=0, qIdx=0, elapsed=0, wrongs=[], hints=0, ticker=null;
+
+function startPlay(nm) {
+  curTeam=nm; gateIdx=0; qIdx=0; elapsed=0; wrongs=[]; hints=0;
+  setTD(nm,{started:true,startTime:Date.now(),finished:false,gate:0});
+  document.getElementById('curTeamName').textContent=nm;
+  show('s-game');
+  renderDots(); updateProg(); loadQ();
+  startTicker();
+}
+
+function startTicker() {
+  if(ticker) clearInterval(ticker);
+  const el=document.getElementById('timerEl');
+  ticker=setInterval(()=>{
+    elapsed++;
+    const rem=TOTAL_SEC-elapsed;
+    if(rem<=0){ clearInterval(ticker); el.textContent='00:00'; el.classList.add('warn'); finishPlay(true); return; }
+    const m=Math.floor(rem/60), s=rem%60;
+    el.textContent=`${pad(m)}:${pad(s)}`;
+    if(rem<=120) el.classList.add('warn');
+  },1000);
+}
+
+// 현재 문제 구조
+function currentQ() { return GATES[gateIdx].questions[qIdx]; }
+function totalGates() { return GATES.length; }
+function totalQinGate() { return GATES[gateIdx].questions.length; }
+
+function renderDots() {
+  document.getElementById('stageDots').innerHTML = GATES.map((g,i)=>{
+    let cls = i<gateIdx?'done':i===gateIdx?'cur':'';
+    let icon = i<gateIdx?'✓':`${i+1}`;
+    return `<div class="s-dot ${cls}">${icon}<br><span>${g.id}관문</span></div>`;
+  }).join('');
+}
+
+function updateProg() {
+  const pct=(gateIdx/totalGates())*100;
+  document.getElementById('progFill').style.width=pct+'%';
+  document.getElementById('progTxt').textContent=`관문 ${gateIdx} / ${totalGates()} 통과`;
+  setTD(curTeam,{gate:gateIdx});
+}
+
+function loadQ() {
+  if(gateIdx >= GATES.length){ finishPlay(false); return; }
+  const gate=GATES[gateIdx];
+  const q=gate.questions[qIdx];
+  const isFirst=qIdx===0;
+
+  let inputHTML='';
+  if(q.type==='choice'){
+    inputHTML=`<div class="choices${q.options.length<=2?' col1':''}" id="choicesDiv">
+      ${q.options.map((o,i)=>`<button class="choice" onclick="checkChoice(${i})" data-i="${i}">${o}</button>`).join('')}
+    </div>`;
+  } else {
+    inputHTML=`<div class="text-row"><input type="text" id="txtAns" placeholder="정답 입력..." maxlength="15"/><button class="btn-red" onclick="checkText()">확인</button></div>`;
+  }
+
+  document.getElementById('qArea').innerHTML=`
+    <div class="q-card">
+      <div class="stage-badge">🔒 ${gate.badge}</div>
+      ${isFirst?`<div class="story-box">${gate.story}</div>`:''}
+      <div class="hint-row"><button class="hint-btn" onclick="toggleHint()">💡 힌트</button></div>
+      <div class="hint-box" id="hintBox">${q.hint}</div>
+      <div class="q-text">${q.q}</div>
+      ${inputHTML}
+      <div class="fb" id="fb"></div>
+      <div class="next-row" id="nextRow" style="display:none;">
+        <button class="btn-red" onclick="nextQ()">다음 →</button>
+      </div>
+    </div>`;
+
+  if(q.type==='text'){
+    document.getElementById('txtAns').addEventListener('keydown',e=>{ if(e.key==='Enter') checkText(); });
+  }
+}
+
+function toggleHint(){
+  const b=document.getElementById('hintBox');
+  if(!b.classList.contains('on')){ b.classList.add('on'); hints++; document.getElementById('hintTxt').textContent=`힌트 ${hints}회`; }
+}
+
+function checkChoice(idx){
+  const q=currentQ();
+  document.querySelectorAll('.choice').forEach(b=>b.disabled=true);
+  const fb=document.getElementById('fb');
+  if(idx===q.answer){
+    document.querySelectorAll('.choice')[idx].classList.add('ok');
+    fb.className='fb on ok';
+    fb.innerHTML=`🔓 정답! <br><small>${q.exp}</small>`;
+  } else {
+    document.querySelectorAll('.choice')[idx].classList.add('bad');
+    document.querySelectorAll('.choice')[q.answer].classList.add('ok');
+    fb.className='fb on bad';
+    fb.innerHTML=`❌ 틀렸습니다. 정답: ${q.options[q.answer]}<br><small>${q.exp}</small>`;
+    wrongs.push({gate:GATES[gateIdx].id, q:q.q.substring(0,30)+'...', ans:q.options[q.answer]});
+  }
+  document.getElementById('nextRow').style.display='block';
+}
+
+function checkText(){
+  const q=currentQ();
+  const val=document.getElementById('txtAns').value.trim();
+  const ok=q.answer.some(a=>a===val||a.toLowerCase()===val.toLowerCase());
+  document.getElementById('txtAns').disabled=true;
+  const fb=document.getElementById('fb');
+  if(ok){
+    fb.className='fb on ok';
+    fb.innerHTML=`🔓 정답! <br><small>${q.exp}</small>`;
+  } else {
+    fb.className='fb on bad';
+    fb.innerHTML=`❌ 틀렸습니다. 정답: <strong>${q.answer[0]}</strong><br><small>${q.exp}</small>`;
+    wrongs.push({gate:GATES[gateIdx].id, q:q.q.substring(0,30)+'...', ans:q.answer[0]});
+  }
+  document.getElementById('nextRow').style.display='block';
+}
+
+function nextQ(){
+  qIdx++;
+  if(qIdx >= GATES[gateIdx].questions.length){
+    gateIdx++; qIdx=0;
+    updateProg(); renderDots();
+    if(gateIdx >= GATES.length){ finishPlay(false); return; }
+  }
+  loadQ();
+}
+
+// ═══════════════════════════════════════
+// 완료
+// ═══════════════════════════════════════
+function finishPlay(timeout){
+  clearInterval(ticker);
+  const m=Math.floor(elapsed/60), s=elapsed%60;
+  const timeStr=`${pad(m)}분 ${pad(s)}초`;
+  setTD(curTeam,{finished:true, finishTime:elapsed, hints});
+
+  const all=getAllTD();
+  const fin=Object.entries(all).filter(([n,d])=>d.finished).sort((a,b)=>(a[1].finishTime||9999)-(b[1].finishTime||9999));
+  const rank=fin.findIndex(([n])=>n===curTeam)+1;
+  const emoji=rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':`${rank}위`;
+
+  const done=document.getElementById('s-done');
+  done.style.display='block';
+  document.getElementById('s-game').classList.remove('on');
+  document.getElementById('doneTeam').textContent=`${curTeam} 팀`;
+  document.getElementById('doneRank').textContent=emoji;
+  document.getElementById('doneTime').textContent=`⏱ ${timeStr}`;
+
+  if(wrongs.length>0){
+    const rb=document.getElementById('reviewBox');
+    rb.style.display='block';
+    document.getElementById('reviewList').innerHTML=wrongs.map(w=>
+      `<div class="review-item"><strong>[${w.gate}관문]</strong> ${w.q}<br>→ 정답: ${w.ans}</div>`
+    ).join('');
+  }
+}
+
+function showLiveBoard(){
+  document.getElementById('s-done').style.display='none';
+  document.getElementById('lbLive').style.display='block';
+  renderLB('lbBody');
+  setInterval(()=>renderLB('lbBody'),3000);
+}
+
+// ═══════════════════════════════════════
+// 순위판 렌더링
+// ═══════════════════════════════════════
+function renderLB(targetId){
+  const teams=getTeams(), all=getAllTD();
+  const rows=teams.map(nm=>{
+    const td=all[nm]||{};
+    return { nm, gate:td.gate||0, finished:td.finished||false, finishTime:td.finishTime||null, started:td.started||false };
+  }).sort((a,b)=>{
+    if(a.finished&&b.finished) return (a.finishTime||9999)-(b.finishTime||9999);
+    if(a.finished) return -1; if(b.finished) return 1;
+    return b.gate-a.gate;
+  });
+
+  const tbody=document.getElementById(targetId);
+  if(!tbody) return;
+  tbody.innerHTML=rows.map((r,i)=>{
+    const rk=i+1, rc=rk<=3?`r${rk}`:'';
+    let stat='', tc='-', rowc='';
+    if(r.finished){
+      const m=Math.floor(r.finishTime/60),s=r.finishTime%60;
+      tc=`${pad(m)}:${pad(s)}`;
+      stat=`<span class="status-badge s-escaped">탈출!</span>`;
+      rowc='done-row';
+    } else if(r.started){
+      stat=`<span class="status-badge s-playing">진행중</span>`;
+    } else {
+      stat=`<span class="status-badge s-wait">대기</span>`;
+    }
+    const bar='■'.repeat(r.gate)+'□'.repeat(4-r.gate);
+    return `<tr class="${rowc}">
+      <td class="rank-cell ${rc}">${rk}</td>
+      <td>${r.nm}</td>
+      <td style="font-family:monospace;letter-spacing:2px;color:var(--gold);font-size:13px">${bar}</td>
+      <td>${stat}</td>
+      <td style="font-size:13px;color:var(--brown)">${tc}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════
+// 유틸
+// ═══════════════════════════════════════
+function show(id){
+  ['s-register','s-select','s-game'].forEach(s=>{
+    const el=document.getElementById(s);
+    if(el) el.classList.toggle('on', s===id);
+  });
+}
+function pad(n){ return String(n).padStart(2,'0'); }
+function esc(s){ return s.replace(/'/g,"\\'"); }
+
+renderRegister();
+</script>
+</body>
+</html>
