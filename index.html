@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>조선의 스파이: 사림파를 구하고 붕당의 비밀을 풀어라!</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700&family=Noto+Sans+KR:wght@400;500;700&display=swap');
+:root {
+  --ink:#1E1208; --paper:#F7EDD4; --paper-mid:#EDD9A3; --paper-dark:#D4B97A;
+  --red:#8B1A2A; --red-light:#F5DCDC; --gold:#7A5C10; --gold-light:#F5E4A0;
+  --brown:#3E2510; --green:#1A5C30; --green-light:#D0ECD8; --gray:#8A7A68;
+  --border:2px solid #C4A060;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Noto Sans KR',sans-serif;background:#1A0F06;min-height:100vh;padding:10px;
+  background-image:repeating-linear-gradient(0deg,transparent,transparent 49px,rgba(180,140,80,.06) 50px),
+  repeating-linear-gradient(90deg,transparent,transparent 49px,rgba(180,140,80,.06) 50px);}
+.wrap{max-width:680px;margin:0 auto;}
+
+/* 헤더 */
+.game-header{background:var(--paper);border:3px double var(--paper-dark);border-radius:4px;
+  padding:14px 18px 10px;text-align:center;margin-bottom:10px;position:relative;}
+.game-header::before,.game-header::after{content:'◈';position:absolute;top:10px;color:var(--gold);font-size:16px;}
+.game-header::before{left:14px;}.game-header::after{right:14px;}
+.game-header h1{font-family:'Noto Serif KR',serif;font-size:17px;color:var(--ink);letter-spacing:1px;line-height:1.5;}
+.game-header h1 em{color:var(--red);font-style:normal;}
+.game-header p{font-size:11px;color:var(--brown);margin-top:3px;}
+
+/* 카드 */
+.card{background:var(--paper);border:var(--border);border-radius:4px;margin-bottom:10px;position:relative;overflow:hidden;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--red);}
+.card-body{padding:16px 18px 18px;}
+.section-title{font-family:'Noto Serif KR',serif;font-size:14px;color:var(--ink);margin-bottom:12px;
+  padding-bottom:8px;border-bottom:1px solid var(--paper-dark);letter-spacing:1px;}
+.section-title span{color:var(--red);font-size:17px;margin-right:4px;}
+
+/* 버튼 */
+.btn-red{padding:9px 16px;font-size:14px;font-family:'Noto Sans KR',sans-serif;font-weight:700;
+  background:var(--red);color:#FFF;border:none;border-radius:4px;cursor:pointer;letter-spacing:1px;transition:opacity .15s;}
+.btn-red:hover{opacity:.85;} .btn-red:disabled{background:var(--gray);cursor:not-allowed;}
+
+/* 입력 */
+.input-row{display:flex;gap:8px;margin-bottom:10px;}
+.input-row input,.text-row input{flex:1;padding:9px 12px;font-size:14px;font-family:'Noto Sans KR',sans-serif;
+  background:#FDF6E3;border:1.5px solid var(--paper-dark);border-radius:4px;color:var(--ink);outline:none;}
+.input-row input:focus,.text-row input:focus{border-color:var(--gold);}
+.input-row input::placeholder,.text-row input::placeholder{color:var(--gray);}
+.text-row{display:flex;gap:8px;margin-top:4px;}
+
+/* 게임바 */
+.game-bar{background:var(--paper);border:var(--border);border-radius:4px;
+  padding:10px 16px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;}
+.team-label{font-family:'Noto Serif KR',serif;font-size:14px;color:var(--ink);}
+.team-label strong{color:var(--red);}
+.timer{font-size:22px;font-weight:700;font-family:'Noto Serif KR',serif;color:var(--ink);min-width:70px;text-align:right;}
+.timer.warn{color:var(--red);}
+
+/* 진행바 */
+.prog-card{background:var(--paper);border:var(--border);border-radius:4px;padding:10px 16px;margin-bottom:8px;}
+.prog-meta{display:flex;justify-content:space-between;font-size:11px;color:var(--brown);margin-bottom:5px;}
+.prog-track{height:7px;background:var(--paper-mid);border-radius:4px;overflow:hidden;}
+.prog-fill{height:100%;background:var(--gold);border-radius:4px;transition:width .4s;}
+.stage-row{display:flex;justify-content:space-between;margin-top:6px;}
+.s-dot{flex:1;text-align:center;font-size:10px;color:var(--gray);}
+.s-dot.done{color:var(--green);font-weight:700;} .s-dot.cur{color:var(--red);font-weight:700;}
+
+/* 문제 */
+.q-card{background:var(--paper);border:var(--border);border-radius:4px;padding:16px 18px 18px;margin-bottom:8px;position:relative;overflow:hidden;}
+.q-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--red);}
+.stage-badge{display:inline-block;background:var(--red);color:#FFF;font-size:11px;font-weight:700;
+  padding:3px 10px;border-radius:3px;letter-spacing:1px;margin-bottom:10px;}
+.story-box{font-size:12px;color:var(--brown);background:var(--paper-mid);border-left:3px solid var(--gold);
+  padding:8px 10px;border-radius:0 4px 4px 0;margin-bottom:12px;line-height:1.7;}
+.story-box strong{color:var(--red);}
+.hint-row{display:flex;justify-content:flex-end;margin-bottom:8px;}
+.hint-btn{font-size:12px;color:var(--gold);background:none;border:1px solid var(--gold);border-radius:3px;padding:3px 10px;cursor:pointer;}
+.hint-box{font-size:12px;color:var(--brown);background:var(--gold-light);border:1px solid var(--gold);
+  border-radius:4px;padding:7px 10px;margin-bottom:8px;display:none;line-height:1.6;}
+.hint-box.on{display:block;}
+.q-text{font-family:'Noto Serif KR',serif;font-size:15px;color:var(--ink);line-height:1.8;margin-bottom:14px;font-weight:700;}
+
+/* 선택지 */
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.choices.col1{grid-template-columns:1fr;}
+.choice{padding:10px 13px;font-size:13px;font-family:'Noto Sans KR',sans-serif;
+  background:#FDF6E3;border:1.5px solid var(--paper-dark);border-radius:4px;cursor:pointer;
+  text-align:left;color:var(--ink);transition:border-color .15s,background .15s;line-height:1.5;}
+.choice:hover:not(:disabled){border-color:var(--gold);background:var(--gold-light);}
+.choice.ok{border-color:var(--green);background:var(--green-light);color:var(--green);font-weight:700;}
+.choice.bad{border-color:var(--red);background:var(--red-light);color:var(--red);}
+.choice:disabled{cursor:default;}
+
+/* 피드백 */
+.fb{margin-top:12px;padding:10px 13px;border-radius:4px;font-size:13px;line-height:1.7;display:none;}
+.fb.on{display:block;}
+.fb.ok{background:var(--green-light);color:var(--green);border-left:4px solid var(--green);}
+.fb.bad{background:var(--red-light);color:var(--red);border-left:4px solid var(--red);}
+.next-row{margin-top:12px;text-align:right;}
+
+/* 페널티 */
+.penalty-flash{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(139,26,42,.35);
+  display:flex;align-items:center;justify-content:center;z-index:999;pointer-events:none;}
+.penalty-msg{background:var(--red);color:#FFF;font-family:'Noto Serif KR',serif;
+  font-size:22px;font-weight:700;padding:16px 32px;border-radius:6px;letter-spacing:2px;text-align:center;line-height:1.5;}
+.penalty-badge{display:inline-block;background:var(--red-light);color:var(--red);
+  font-size:11px;font-weight:700;padding:2px 8px;border-radius:3px;margin-left:8px;letter-spacing:.5px;}
+
+/* 완료 */
+.done-card{background:var(--paper);border:3px double var(--paper-dark);border-radius:4px;
+  padding:28px 20px;text-align:center;display:none;}
+.done-card.on{display:block;}
+.done-card h2{font-family:'Noto Serif KR',serif;font-size:22px;color:var(--red);letter-spacing:2px;margin-bottom:6px;}
+.done-card .dt{font-size:13px;color:var(--brown);margin-bottom:14px;}
+.done-card .rank-big{font-size:44px;margin:8px 0;}
+.done-card .time-big{font-size:16px;font-weight:700;color:var(--gold);margin-bottom:8px;}
+.done-card .penalty-info{font-size:13px;color:var(--red);margin-bottom:16px;}
+.review-box{text-align:left;background:#FDF6E3;border:1px solid var(--paper-dark);border-radius:4px;padding:12px 14px;margin-bottom:16px;}
+.review-box h3{font-size:13px;font-weight:700;color:var(--brown);margin-bottom:8px;letter-spacing:1px;}
+.review-item{font-size:12px;color:var(--ink);padding:4px 0;border-bottom:.5px solid var(--paper-mid);line-height:1.6;}
+.review-item:last-child{border-bottom:none;}
+.review-item strong{color:var(--red);}
+
+/* 화면 전환 */
+.screen{display:none;} .screen.on{display:block;}
+
+/* 순위판 안내 */
+.notice-box{background:var(--gold-light);border:1px solid var(--gold);border-radius:4px;
+  padding:10px 14px;font-size:12px;color:var(--brown);line-height:1.7;margin-top:12px;}
+.notice-box strong{color:var(--red);}
+
+@media(max-width:480px){.choices{grid-template-columns:1fr;}.game-header h1{font-size:14px;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- 헤더 -->
+<div class="game-header">
+  <h1>🕵️ 조선의 스파이<br><em>사림파를 구하고 붕당의 비밀을 풀어라!</em></h1>
+  <p>성종 시대 암행어사가 되어 4개의 관문을 돌파하라 — 제한시간 15분</p>
+</div>
+
+<!-- ① 팀 이름 입력 화면 -->
+<div class="screen on" id="s-start">
+  <div class="card"><div class="card-body">
+    <div class="section-title"><span>🔑</span> 우리 팀 이름을 입력하세요</div>
+    <div class="input-row">
+      <input id="teamInput" type="text" placeholder="예) 사헌부팀, 1모둠, 홍길동팀..." maxlength="15" />
+      <button class="btn-red" id="startBtn" onclick="startPlay()">시작!</button>
+    </div>
+    <div id="startError" style="font-size:12px;color:var(--red);margin-top:4px;display:none;">팀 이름을 입력해주세요!</div>
+    <div class="notice-box">
+      📌 <strong>사용 방법</strong><br>
+      ① 각 모둠이 같은 링크에 접속합니다<br>
+      ② 모둠 이름 입력 후 <strong>"시작!"</strong> 버튼을 누르면 바로 게임이 시작됩니다<br>
+      ③ 틀리면 <strong>⏱ +30초 페널티</strong>가 추가되고 다시 풀어야 합니다<br>
+      ④ 4개 관문을 가장 빠르게 통과한 팀이 1등!
+    </div>
+  </div></div>
+</div>
+
+<!-- ② 게임 화면 -->
+<div class="screen" id="s-game">
+  <div class="game-bar">
+    <div class="team-label">팀: <strong id="curTeamName"></strong></div>
+    <div class="timer" id="timerEl">15:00</div>
+  </div>
+  <div class="prog-card">
+    <div class="prog-meta">
+      <span id="progTxt">관문 0 / 4 통과</span>
+      <span id="extraInfo"></span>
+    </div>
+    <div class="prog-track"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+    <div class="stage-row" id="stageDots"></div>
+  </div>
+  <div id="qArea"></div>
+</div>
+
+<!-- ③ 완료 화면 -->
+<div class="done-card" id="s-done">
+  <div style="font-size:52px;margin-bottom:6px;">🎉</div>
+  <h2>임무 완료!</h2>
+  <div class="dt" id="doneTeam"></div>
+  <div class="rank-big">⏱</div>
+  <div class="time-big" id="doneTime"></div>
+  <div class="penalty-info" id="donePenalty"></div>
+  <div class="review-box" id="reviewBox" style="display:none;">
+    <h3>📖 틀린 문제 복습</h3>
+    <div id="reviewList"></div>
+  </div>
+  <div class="notice-box" style="margin-bottom:12px;">
+    📣 선생님께 시간을 보고하거나 칠판에 적어주세요!<br>
+    <strong>팀 이름 / 완료 시간 / 페널티 횟수</strong>
+  </div>
+  <button class="btn-red" onclick="goRetry()">🔄 처음부터 다시</button>
+</div>
+
+</div>
+<script>
+const GATES = [
+  {
+    id:1, badge:"🚪 제1관문: 권력의 감시자, 3사의 비밀번호",
+    story:`사림파 선비들이 성종 임금의 등용을 받아 궁궐에 들어왔습니다.<br>
+훈구파의 권력 독점을 감시하기 위해 언론기관 <strong>'3사'</strong>에 배치되었습니다.<br>
+3사의 비밀 작전 기지의 문을 열려면 각 기관의 임무를 정확히 맞춰야 합니다!`,
+    questions:[
+      {q:"Q1. 관리들이 나쁜 짓을 하지 않는지 감시하는, 오늘날의 감사원 같은 곳은?",
+       hint:'💡 "법 앞에는 귀천이 없다! 최고 권력자 우의정 한치형의 노비도 처벌한다!"',
+       type:"choice",options:["① 홍문관","② 사간원","③ 사헌부","④ 이조전랑"],answer:2,
+       exp:"사헌부는 관리들의 비위를 감찰하는 기관으로, 오늘날의 감사원에 해당합니다."},
+      {q:'Q2. 왕이 매사냥에 빠지려 할 때 "전하, 그것은 아니되옵니다!"라며 목숨 걸고 바른말을 하던 곳은?',
+       hint:"💡 밤낮으로 대궐 앞에 엎드려 상소를 올린 끝에 성종이 아끼던 매를 궁궐 밖으로 날려 보내게 만든 곳!",
+       type:"choice",options:["① 사헌부","② 사간원","③ 홍문관","④ 성균관"],answer:1,
+       exp:"사간원은 왕의 잘못된 결정에 직언하는 기관입니다. 성종의 매사냥을 막아낸 일화로 유명합니다."},
+      {q:"Q3. 왕을 보좌하는 학문 연구소이자, 훈구 세력의 나쁜 짓을 밝혀내는 국가 연구기관은?",
+       hint:"💡 왕의 자문을 담당하면서도 훈구 세력 견제의 역할도 맡은 곳!",
+       type:"choice",options:["① 사간원","② 사헌부","③ 홍문관","④ 소격서"],answer:2,
+       exp:"홍문관은 왕을 보좌하는 학문 연구기관으로, 사헌부·사간원과 함께 3사를 이룹니다."},
+      {q:"🔑 패스워드: 사헌부·사간원·홍문관을 합쳐 숫자를 포함해 2글자로 뭐라고 부를까요?",
+       hint:"💡 3개의 언론기관을 묶어 부르는 말!",
+       type:"text",answer:["3사","삼사"],
+       exp:"사헌부·사간원·홍문관 세 기관을 묶어 '3사'라고 합니다. 사림은 이 3사를 통해 훈구를 견제했습니다."}
+    ]
+  },
+  {
+    id:2, badge:"🚪 제2관문: 조의제문 속 '암호명'을 풀어라!",
+    story:`성종의 뒤를 이어 연산군이 왕이 되었습니다.<br>
+훈구파들이 김종직의 <strong>「조의제문」</strong>을 들고 와 연산군을 자극합니다.<br>
+"이 글은 전하의 증조할아버지를 도적으로 비유한 글입니다!"<br>
+첫 번째 사화 <strong>[무오사화]</strong>가 터지기 직전! 글 속 진짜 인물을 찾아내세요!`,
+    questions:[
+      {q:'「조의제문」에서 "억울하게 죽임당한 의제"와 "왕위를 빼앗은 항우"는 실제 조선의 누구를 빗댄 것인가?',
+       hint:"💡 세조에게 왕위를 빼앗기고 죽임을 당한 어린 왕을 떠올려 보세요!",
+       type:"choice",
+       options:["① 의제=세조, 항우=단종","② 의제=단종, 항우=세조","③ 의제=연산군, 항우=성종","④ 의제=조광조, 항우=중종"],
+       answer:1,
+       exp:"의제는 단종, 항우는 세조를 빗댄 것입니다. 연산군은 세조를 도적에 비유했다며 분노해 무오사화를 일으키고 부관참시를 명했습니다."}
+    ]
+  },
+  {
+    id:3, badge:"🚪 제3관문: 조광조의 개혁을 멈추게 한 '나뭇잎'",
+    story:`연산군이 쫓겨나고 <strong>중종</strong>이 즉위했습니다!<br>
+중종은 훈구파를 견제하기 위해 사림파의 리더 <strong>조광조</strong>를 등용합니다.<br>
+조광조는 폭풍 같은 개혁을 시작하지만, 훈구파의 엄청난 반발을 사게 됩니다.<br>
+개혁 내용을 정확히 파악해 기묘사화의 진실을 밝히세요!`,
+    questions:[
+      {q:"다음 중 조광조가 추진한 급진적인 개혁 내용으로 올바르지 않은 것은?",
+       hint:"💡 현량과·위훈 삭제·소격서 폐지가 조광조의 3대 개혁! 나머지 하나는 연산군이 한 일입니다.",
+       type:"choice",
+       options:["① 현량과 — 과거 없이 면접으로 사림파 대거 등용","② 위훈 삭제 — 가짜 공신 76명의 공훈 삭제·재산 몰수","③ 소격서 폐지 — 왕실 도교 제사 기관을 미신이라 철폐","④ 흥청망청 — 전국 여성 뽑아 성균관을 노래방으로 개조"],
+       answer:3,
+       exp:"④는 연산군이 한 일입니다. 조광조의 3대 개혁은 현량과 실시, 위훈 삭제, 소격서 폐지입니다. 훈구파는 나뭇잎에 꿀로 '주초위왕'을 써서 조광조를 역모로 몰았고, 기묘사화가 발생했습니다."}
+    ]
+  },
+  {
+    id:4, badge:"🚪 제4관문: 불사조 사림파, 붕당의 탄생",
+    story:`4차례 사화(무오·갑자·기묘·을사)에도 사림파는 살아남아 조선 정권의 주인이 됩니다!<br>
+비밀 무기는 <strong>서원</strong>(지방 성리학 교육기관)과 <strong>향약</strong>(지방 자치 규칙)이었습니다.<br>
+하지만 정권을 잡은 사림파 내부에서 이번엔 <strong>분열</strong>이 시작됩니다...`,
+    questions:[
+      {q:"사림파가 중앙에서 쫓겨나도 지방에서 인재를 키워 끊임없이 중앙으로 진출시킨 '지방 사립 성리학 교육기관'은?",
+       hint:"💡 지방에 세워진 사학 교육기관으로 사림의 '무한 복제 기지' 역할을 했습니다.",
+       type:"text",answer:["서원"],
+       exp:"서원은 지방에 세워진 사립 성리학 교육기관으로, 사림이 아무리 사화를 당해도 세력이 줄지 않은 핵심 이유입니다."},
+      {q:"사림파가 직접 작성해 백성들의 삶을 도덕적으로 통제하고 강력한 지방 여론을 형성한 '지방 자치 규칙'은?",
+       hint:"💡 효도, 신의 등 도덕적 규칙을 만들어 지방 사회를 실질적으로 지배한 제도입니다.",
+       type:"text",answer:["향약"],
+       exp:"향약은 사림이 지방 사회를 장악한 핵심 도구로, 지방 여론을 형성해 훈구파도 무시할 수 없는 정치적 압박 카드가 되었습니다."},
+      {q:"이조전랑 임명 문제로 사림이 동인과 서인으로 갈라졌습니다. 두 붕당 이름의 유래로 옳은 것은?",
+       hint:"💡 두 사람이 살던 집의 방향(동쪽/서쪽)에서 이름이 유래했습니다!",
+       type:"choice",
+       options:["① 남인과 북인으로 먼저 나뉜 뒤 동·서로 분화","② 김효원(동쪽 거주)→동인, 심의겸(서쪽 거주)→서인","③ 학문 연구 방향(동방·서방)에서 유래","④ 훈구파가 붙여준 이름에서 유래"],
+       answer:1,
+       exp:"김효원이 동쪽, 심의겸이 서쪽에 살았던 것에서 동인·서인의 이름이 유래했습니다. 이조전랑의 3사 관리 임명권과 후임자 추천권을 둘러싼 갈등이 분열의 시작이었습니다."}
+    ]
+  }
+];
+
+const TOTAL_SEC=15*60;
+let curTeam='',gateIdx=0,qIdx=0,elapsed=0,wrongs=[],hints=0,penalty=0,ticker=null;
+
+function startPlay(){
+  const inp=document.getElementById('teamInput');
+  const nm=inp.value.trim();
+  if(!nm){document.getElementById('startError').style.display='block';inp.focus();return;}
+  document.getElementById('startError').style.display='none';
+  curTeam=nm; gateIdx=0; qIdx=0; elapsed=0; wrongs=[]; hints=0; penalty=0;
+  document.getElementById('curTeamName').textContent=nm;
+  show('s-game');
+  renderDots(); updateProg(); loadQ(); startTicker();
+}
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&document.activeElement.id==='teamInput') startPlay();
+});
+
+function startTicker(){
+  if(ticker) clearInterval(ticker);
+  const el=document.getElementById('timerEl');
+  ticker=setInterval(()=>{
+    elapsed++;
+    const rem=TOTAL_SEC-elapsed;
+    if(rem<=0){clearInterval(ticker);el.textContent='00:00';el.classList.add('warn');finishPlay(true);return;}
+    const m=Math.floor(rem/60),s=rem%60;
+    el.textContent=`${pad(m)}:${pad(s)}`;
+    if(rem<=120) el.classList.add('warn');
+  },1000);
+}
+
+function currentQ(){return GATES[gateIdx].questions[qIdx];}
+
+function renderDots(){
+  document.getElementById('stageDots').innerHTML=GATES.map((g,i)=>{
+    let cls=i<gateIdx?'done':i===gateIdx?'cur':'';
+    let icon=i<gateIdx?'✓':`${i+1}`;
+    return `<div class="s-dot ${cls}">${icon}<br><span>${g.id}관문</span></div>`;
+  }).join('');
+}
+
+function updateProg(){
+  const pct=(gateIdx/GATES.length)*100;
+  document.getElementById('progFill').style.width=pct+'%';
+  document.getElementById('progTxt').textContent=`관문 ${gateIdx} / ${GATES.length} 통과`;
+  updateExtra();
+}
+
+function updateExtra(){
+  const parts=[];
+  if(hints>0) parts.push(`힌트 ${hints}회`);
+  if(penalty>0) parts.push(`<span class="penalty-badge">⏱ 페널티 ${penalty}회 (+${penalty*30}초)</span>`);
+  document.getElementById('extraInfo').innerHTML=parts.join(' ');
+}
+
+function loadQ(){
+  if(gateIdx>=GATES.length){finishPlay(false);return;}
+  const gate=GATES[gateIdx],q=gate.questions[qIdx],isFirst=qIdx===0;
+  let inputHTML='';
+  if(q.type==='choice'){
+    inputHTML=`<div class="choices${q.options.length<=2?' col1':''}" id="choicesDiv">
+      ${q.options.map((o,i)=>`<button class="choice" onclick="checkChoice(${i})">${o}</button>`).join('')}
+    </div>`;
+  } else {
+    inputHTML=`<div class="text-row"><input type="text" id="txtAns" placeholder="정답 입력..." maxlength="15"/><button class="btn-red" onclick="checkText()">확인</button></div>`;
+  }
+  document.getElementById('qArea').innerHTML=`
+    <div class="q-card">
+      <div class="stage-badge">🔒 ${gate.badge}</div>
+      ${isFirst?`<div class="story-box">${gate.story}</div>`:''}
+      <div class="hint-row"><button class="hint-btn" onclick="toggleHint()">💡 힌트</button></div>
+      <div class="hint-box" id="hintBox">${q.hint}</div>
+      <div class="q-text">${q.q}</div>
+      ${inputHTML}
+      <div class="fb" id="fb"></div>
+      <div class="next-row" id="nextRow" style="display:none;">
+        <button class="btn-red" onclick="nextQ()">다음 →</button>
+      </div>
+    </div>`;
+  if(q.type==='text'){
+    document.getElementById('txtAns').addEventListener('keydown',e=>{if(e.key==='Enter')checkText();});
+  }
+}
+
+function toggleHint(){
+  const b=document.getElementById('hintBox');
+  if(!b.classList.contains('on')){b.classList.add('on');hints++;updateExtra();}
+}
+
+function checkChoice(idx){
+  const q=currentQ(),fb=document.getElementById('fb');
+  if(idx===q.answer){
+    document.querySelectorAll('.choice').forEach(b=>b.disabled=true);
+    document.querySelectorAll('.choice')[idx].classList.add('ok');
+    fb.className='fb on ok';
+    fb.innerHTML=`🔓 정답! 자물쇠가 열렸습니다!<br><small>${q.exp}</small>`;
+    document.getElementById('nextRow').style.display='block';
+  } else {
+    elapsed+=30; penalty++;
+    updateExtra();
+    const btn=document.querySelectorAll('.choice')[idx];
+    btn.classList.add('bad');
+    showPenaltyFlash();
+    wrongs.push({gate:GATES[gateIdx].id,q:q.q.substring(0,28)+'...',ans:q.options[q.answer]});
+    setTimeout(()=>{
+      btn.classList.remove('bad');
+      fb.className='fb on bad';
+      fb.innerHTML=`❌ 틀렸습니다! ⏱ +30초 페널티 — 다시 도전하세요!`;
+    },700);
+  }
+}
+
+function checkText(){
+  const q=currentQ(),inp=document.getElementById('txtAns'),val=inp.value.trim(),fb=document.getElementById('fb');
+  const ok=q.answer.some(a=>a===val||a.toLowerCase()===val.toLowerCase());
+  if(ok){
+    inp.disabled=true;
+    fb.className='fb on ok';
+    fb.innerHTML=`🔓 정답! 자물쇠가 열렸습니다!<br><small>${q.exp}</small>`;
+    document.getElementById('nextRow').style.display='block';
+  } else {
+    elapsed+=30; penalty++;
+    updateExtra();
+    showPenaltyFlash();
+    wrongs.push({gate:GATES[gateIdx].id,q:q.q.substring(0,28)+'...',ans:q.answer[0]});
+    fb.className='fb on bad';
+    fb.innerHTML=`❌ 틀렸습니다! ⏱ +30초 페널티 — 다시 도전하세요!`;
+    inp.value=''; inp.focus();
+  }
+}
+
+function showPenaltyFlash(){
+  const el=document.createElement('div');
+  el.className='penalty-flash';
+  el.innerHTML=`<div class="penalty-msg">⏱ +30초 페널티!<br><span style="font-size:14px">다시 도전하세요</span></div>`;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),1200);
+}
+
+function nextQ(){
+  qIdx++;
+  if(qIdx>=GATES[gateIdx].questions.length){gateIdx++;qIdx=0;updateProg();renderDots();}
+  if(gateIdx>=GATES.length){finishPlay(false);return;}
+  loadQ();
+}
+
+function finishPlay(timeout){
+  clearInterval(ticker);
+  const m=Math.floor(elapsed/60),s=elapsed%60;
+  const done=document.getElementById('s-done');
+  done.style.display='block';
+  document.getElementById('s-game').classList.remove('on');
+  document.getElementById('doneTeam').textContent=`${curTeam} 팀`;
+  document.getElementById('doneTime').textContent=`완료 시간: ${pad(m)}분 ${pad(s)}초`;
+  document.getElementById('donePenalty').textContent=penalty>0?`페널티 ${penalty}회 (+${penalty*30}초 포함)`:'페널티 없음 🎊';
+  if(wrongs.length>0){
+    document.getElementById('reviewBox').style.display='block';
+    document.getElementById('reviewList').innerHTML=wrongs.map(w=>
+      `<div class="review-item"><strong>[${w.gate}관문]</strong> ${w.q}<br>→ 정답: ${w.ans}</div>`
+    ).join('');
+  }
+}
+
+function goRetry(){
+  clearInterval(ticker);
+  document.getElementById('s-done').style.display='none';
+  document.getElementById('teamInput').value='';
+  show('s-start');
+}
+
+function show(id){
+  ['s-start','s-game'].forEach(s=>{
+    const el=document.getElementById(s);
+    if(el) el.classList.toggle('on',s===id);
+  });
+}
+function pad(n){return String(n).padStart(2,'0');}
+</script>
+</body>
+</html>
